@@ -127,7 +127,7 @@
     .card-nip  { font-size: .75rem; color: var(--teks-sekunder); margin-top: 1px; font-family: monospace; }
     .badge { display: inline-block; font-size: .68rem; font-weight: 600; padding: 1px 7px; border-radius: 99px; margin-left: .4rem; }
     .badge-pns  { background: #DBEAFE; color: #1E40AF; }
-    .badge-pppk { background: #D1FAE5; color: #065F46; }
+    .badge-cpns { background: #FEF3C7; color: #92400E; }
     .card-meta { display: flex; flex-wrap: wrap; gap: .25rem .75rem; margin-top: .5rem; font-size: .78rem; color: var(--teks-sekunder); }
     .card-skpd { font-size: .72rem; color: var(--teks-sekunder); margin-top: .4rem; border-top: 1px dashed var(--abu-garis); padding-top: .4rem; }
     .expand-icon { position: absolute; right: 1rem; top: 1rem; color: var(--abu-garis); font-size: 1.1rem; transition: transform .2s; }
@@ -274,7 +274,7 @@
         <select id="filterStatus">
           <option value="">Semua Status ASN</option>
           <option value="1">PNS</option>
-          <option value="3">PPPK</option>
+          <option value="3">CPNS</option>
         </select>
         <select id="filterSkpd"><option value="">Semua SKPD</option></select>
       </div>
@@ -300,9 +300,9 @@
           <div class="tipe-label">👔 PNS</div>
           <div class="tipe-desc">Pegawai Negeri Sipil<br><small id="infoPNS" style="color:var(--hijau)"></small></div>
         </button>
-        <button class="tipe-btn" id="btnPPPK" onclick="selectTipe('pppk')">
-          <div class="tipe-label">📋 PPPK</div>
-          <div class="tipe-desc">Pegawai Pemerintah dengan<br>Perjanjian Kerja<br><small id="infoPPPK" style="color:var(--hijau)"></small></div>
+        <button class="tipe-btn" id="btnCPNS" onclick="selectTipe('cpns')">
+          <div class="tipe-label">📋 CPNS</div>
+          <div class="tipe-desc">Calon Pegawai Negeri Sipil<br><small id="infoCPNS" style="color:var(--hijau)"></small></div>
         </button>
       </div>
 
@@ -311,7 +311,7 @@
       <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
         <div class="upload-icon">📂</div>
         <h3>Klik atau seret file Excel ke sini</h3>
-        <p>Format: <strong>.xlsx</strong> dari SIPDRI (SIPDRI0231109XXXXXX_PNS.xlsx / _PPPK.xlsx)</p>
+        <p>Format: <strong>.xlsx</strong> dari SIPDRI (SIPDRI0231109XXXXXX_PNS.xlsx / _CPNS.xlsx)</p>
         <div class="hint">File diproses lokal di browser — data tidak dikirim ke internet</div>
       </div>
       <input type="file" id="fileInput" accept=".xlsx,.xls" />
@@ -359,7 +359,7 @@
       <div style="font-size:.82rem;line-height:1.7;color:var(--teks-sekunder)">
         <p style="margin-bottom:.5rem"><strong style="color:var(--teks)">Langkah update data:</strong></p>
         <ol style="padding-left:1.2rem;display:flex;flex-direction:column;gap:.3rem">
-          <li>Pilih jenis pegawai (PNS atau PPPK) sesuai file yang akan diupload</li>
+          <li>Pilih jenis pegawai (PNS atau CPNS) sesuai file yang akan diupload</li>
           <li>Upload file <code>.xlsx</code> hasil export dari SIPDRI</li>
           <li>Periksa preview dan statistik data</li>
           <li>Klik <strong>"Simpan & Update Database"</strong></li>
@@ -367,7 +367,7 @@
           <li>Upload file tersebut ke GitHub: <code>public/pegawai.json</code></li>
           <li>Tunggu ±30 detik → website otomatis terupdate</li>
         </ol>
-        <p style="margin-top:.75rem"><strong style="color:var(--teks)">Catatan:</strong> Data PNS dan PPPK digabung otomatis dalam file <code>pegawai.json</code>. Upload PNS dulu, lalu PPPK — keduanya akan tergabung.</p>
+        <p style="margin-top:.75rem"><strong style="color:var(--teks)">Catatan:</strong> Data PNS dan CPNS digabung otomatis dalam file <code>pegawai.json</code>. Upload PNS dulu, lalu CPNS — keduanya akan tergabung.</p>
       </div>
     </div>
 
@@ -388,7 +388,7 @@ let allData = [], filtered = [], currentPage = 1, currentQuery = '';
 function rupiah(n) { return 'Rp ' + (parseInt(n)||0).toLocaleString('id-ID'); }
 function statusLabel(s) {
   if (s==='1') return '<span class="badge badge-pns">PNS</span>';
-  return '<span class="badge badge-pppk">PPPK</span>';
+  return '<span class="badge badge-cpns">CPNS</span>';
 }
 function nikahLabel(s) { return s==='1' ? 'Menikah' : 'Tidak Menikah / Janda / Duda'; }
 function initials(nama) {
@@ -425,9 +425,9 @@ function buildSkpdFilter() {
 
 function updateAdminInfo() {
   const pns  = allData.filter(d=>d.status_asn==='1').length;
-  const pppk = allData.filter(d=>d.status_asn==='3').length;
+  const cpns = allData.filter(d=>d.status_asn==='3').length; // CPNS
   document.getElementById('infoPNS').textContent  = pns  ? `${pns.toLocaleString('id-ID')} data aktif` : '';
-  document.getElementById('infoPPPK').textContent = pppk ? `${pppk.toLocaleString('id-ID')} data aktif` : '';
+  document.getElementById('infoCPNS').textContent = cpns ? `${cpns.toLocaleString('id-ID')} data aktif` : '';
 }
 
 function doSearch() {
@@ -493,7 +493,7 @@ function renderPage() {
               <tr><td>Masa Kerja</td><td>${d.masa_kerja} tahun</td></tr>
               <tr><td>Jabatan</td><td>${d.jabatan||'—'}</td></tr>
               <tr><td>Eselon</td><td>${d.eselon||'—'}</td></tr>
-              <tr><td>Status ASN</td><td>${d.status_asn==='1'?'PNS':'PPPK'}</td></tr>
+              <tr><td>Status ASN</td><td>${d.status_asn==='1'?'PNS':'CPNS'}</td></tr>
               <tr><td>Bank</td><td>${d.bank}</td></tr>
               <tr><td>Rekening</td><td>${d.rekening}</td></tr>
             </table>
@@ -556,7 +556,7 @@ document.getElementById('filterStatus').addEventListener('change', doSearch);
 let selectedTipe = 'pns';
 let parsedData   = [];
 let dataPNS      = [];
-let dataPPPK     = [];
+let dataCPNS     = [];
 
 // Kolom mapping dari Excel SIPDRI → JSON internal
 const KOLOM_MAP = {
@@ -589,7 +589,7 @@ const KOLOM_MAP = {
 function selectTipe(tipe) {
   selectedTipe = tipe;
   document.getElementById('btnPNS').classList.toggle('active', tipe==='pns');
-  document.getElementById('btnPPPK').classList.toggle('active', tipe==='pppk');
+  document.getElementById('btnCPNS').classList.toggle('active', tipe==='cpns');
   resetAdmin();
 }
 
@@ -696,28 +696,28 @@ function simpanData() {
       dataPNS = parsedData;
       localStorage.setItem('cache_pns', JSON.stringify(dataPNS));
     } else {
-      dataPPPK = parsedData;
-      localStorage.setItem('cache_pppk', JSON.stringify(dataPPPK));
+      dataCPNS = parsedData;
+      localStorage.setItem('cache_cpns', JSON.stringify(dataCPNS));
     }
 
     // Load cache yang lain kalau ada
-    if (selectedTipe === 'pns' && !dataPPPK.length) {
-      const cached = localStorage.getItem('cache_pppk');
-      if (cached) dataPPPK = JSON.parse(cached);
+    if (selectedTipe === 'pns' && !dataCPNS.length) {
+      const cached = localStorage.getItem('cache_cpns');
+      if (cached) dataCPNS = JSON.parse(cached);
     }
-    if (selectedTipe === 'pppk' && !dataPNS.length) {
+    if (selectedTipe === 'cpns' && !dataPNS.length) {
       const cached = localStorage.getItem('cache_pns');
       if (cached) dataPNS = JSON.parse(cached);
     }
 
-    // Gabungkan PNS + PPPK
-    const gabungan = [...dataPNS, ...dataPPPK];
+    // Gabungkan PNS + CPNS
+    const gabungan = [...dataPNS, ...dataCPNS];
 
     // Buat file JSON untuk didownload
-    const jsonStr = JSON.stringify(selectedTipe==='pns' ? dataPNS : dataPPPK, null, null);
+    const jsonStr = JSON.stringify(selectedTipe==='pns' ? dataPNS : dataCPNS, null, null);
     const jsonAll = JSON.stringify(gabungan, null, null);
 
-    const namaFile    = selectedTipe==='pns' ? 'pegawai_pns.json' : 'pegawai_pppk.json';
+    const namaFile    = selectedTipe==='pns' ? 'pegawai_pns.json' : 'pegawai_cpns.json';
     const blobSingle  = new Blob([jsonStr], {type:'application/json'});
     const blobAll     = new Blob([jsonAll],  {type:'application/json'});
     const urlSingle   = URL.createObjectURL(blobSingle);
@@ -731,7 +731,7 @@ function simpanData() {
 
     document.getElementById('downloadMsg').innerHTML =
       `<strong>${selectedTipe.toUpperCase()}</strong>: ${parsedData.length.toLocaleString('id-ID')} pegawai` +
-      (gabungan.length !== parsedData.length ? ` &nbsp;|&nbsp; <strong>Gabungan PNS+PPPK</strong>: ${gabungan.length.toLocaleString('id-ID')} pegawai` : '');
+      (gabungan.length !== parsedData.length ? ` &nbsp;|&nbsp; <strong>Gabungan PNS+CPNS</strong>: ${gabungan.length.toLocaleString('id-ID')} pegawai` : '');
 
     document.getElementById('downloadWrap').style.display = 'block';
     document.getElementById('simpanStatus').textContent = '';
@@ -755,12 +755,12 @@ function resetAdmin() {
   document.getElementById('downloadWrap').style.display = 'none';
 }
 
-// Load cache PNS/PPPK dari localStorage saat pertama buka
+// Load cache PNS/CPNS dari localStorage saat pertama buka
 function loadCache() {
   const cp = localStorage.getItem('cache_pns');
-  const ck = localStorage.getItem('cache_pppk');
+  const ck = localStorage.getItem('cache_cpns');
   if (cp) dataPNS  = JSON.parse(cp);
-  if (ck) dataPPPK = JSON.parse(ck);
+  if (ck) dataCPNS = JSON.parse(ck);
 }
 
 // ─── INIT ───
