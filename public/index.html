@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pencarian Data Pegawai – BPPKAD Grobogan</title>
+  <title>Data Pegawai – BPPKAD Grobogan</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
       --biru-tua:   #1B3A6B;
@@ -16,56 +17,59 @@
       --teks:       #111827;
       --teks-sekunder: #6B7280;
       --putih:      #FFFFFF;
+      --hijau:      #16A34A;
+      --hijau-muda: #DCFCE7;
       --merah:      #DC2626;
+      --merah-muda: #FEE2E2;
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: var(--abu); color: var(--teks); min-height: 100vh; }
 
     /* ─── HEADER ─── */
-    header {
-      background: var(--biru-tua);
-      color: var(--putih);
-      padding: 0 1.5rem;
-    }
+    header { background: var(--biru-tua); color: var(--putih); padding: 0 1.5rem; }
     .header-inner {
-      max-width: 960px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1rem 0;
-      border-bottom: 3px solid var(--emas);
+      max-width: 960px; margin: 0 auto;
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem 0; border-bottom: 3px solid var(--emas);
     }
     .logo-box {
       width: 52px; height: 52px; flex-shrink: 0;
-      background: var(--emas);
-      border-radius: 8px;
+      background: var(--emas); border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
-      font-family: 'Noto Serif', serif;
-      font-weight: 700; font-size: 1.3rem;
-      color: var(--biru-tua);
-      letter-spacing: -1px;
+      font-family: 'Noto Serif', serif; font-weight: 700; font-size: 1.3rem;
+      color: var(--biru-tua); letter-spacing: -1px;
     }
     .header-text h1 { font-size: 1rem; font-weight: 700; line-height: 1.2; }
     .header-text p  { font-size: 0.72rem; opacity: 0.75; margin-top: 2px; }
 
+    /* ─── NAV TABS ─── */
+    nav { background: var(--biru-tua); border-bottom: 1px solid rgba(255,255,255,.1); }
+    .nav-inner { max-width: 960px; margin: 0 auto; display: flex; padding: 0 0; }
+    .nav-tab {
+      padding: .6rem 1.25rem; font-size: .85rem; font-weight: 600;
+      color: rgba(255,255,255,.65); cursor: pointer; border: none;
+      background: transparent; border-bottom: 3px solid transparent;
+      transition: all .15s; font-family: inherit;
+      display: flex; align-items: center; gap: .4rem;
+    }
+    .nav-tab:hover { color: #fff; }
+    .nav-tab.active { color: var(--emas); border-bottom-color: var(--emas); }
+
     /* ─── MAIN ─── */
     main { max-width: 960px; margin: 0 auto; padding: 1.5rem; }
+    .page { display: none; }
+    .page.active { display: block; }
 
-    /* ─── SEARCH BOX ─── */
-    .search-card {
-      background: var(--putih);
-      border: 1px solid var(--abu-garis);
-      border-radius: 12px;
-      padding: 1.25rem 1.5rem;
-      margin-bottom: 1.25rem;
-      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    /* ─── SEARCH CARD ─── */
+    .card {
+      background: var(--putih); border: 1px solid var(--abu-garis);
+      border-radius: 12px; padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,.06);
     }
-    .search-label {
-      font-size: 0.78rem; font-weight: 600; color: var(--biru-tua);
-      text-transform: uppercase; letter-spacing: .04em;
-      margin-bottom: 0.5rem; display: block;
+    .card-title {
+      font-size: .78rem; font-weight: 700; color: var(--biru-tua);
+      text-transform: uppercase; letter-spacing: .05em; margin-bottom: .75rem;
+      display: flex; align-items: center; gap: .4rem;
     }
     .search-row { display: flex; gap: .75rem; flex-wrap: wrap; }
     .search-input-wrap { flex: 1; min-width: 200px; position: relative; }
@@ -75,141 +79,75 @@
     }
     #searchInput {
       width: 100%; padding: .6rem .75rem .6rem 2.2rem;
-      border: 1.5px solid var(--abu-garis);
-      border-radius: 8px;
-      font-size: .95rem; font-family: inherit;
-      transition: border-color .15s;
-      outline: none;
+      border: 1.5px solid var(--abu-garis); border-radius: 8px;
+      font-size: .95rem; font-family: inherit; outline: none; transition: border-color .15s;
     }
     #searchInput:focus { border-color: var(--biru-muda); box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
-    #btnSearch {
-      background: var(--biru-muda); color: #fff;
-      border: none; border-radius: 8px;
-      padding: .6rem 1.4rem;
-      font-size: .9rem; font-weight: 600; cursor: pointer;
-      transition: background .15s;
+    .btn-primary {
+      background: var(--biru-muda); color: #fff; border: none;
+      border-radius: 8px; padding: .6rem 1.4rem;
+      font-size: .9rem; font-weight: 600; cursor: pointer; transition: background .15s; font-family: inherit;
     }
-    #btnSearch:hover { background: #1D4ED8; }
-    #btnClear {
+    .btn-primary:hover { background: #1D4ED8; }
+    .btn-secondary {
       background: transparent; color: var(--teks-sekunder);
       border: 1.5px solid var(--abu-garis); border-radius: 8px;
-      padding: .6rem 1rem;
-      font-size: .9rem; cursor: pointer;
-      transition: all .15s;
+      padding: .6rem 1rem; font-size: .9rem; cursor: pointer; font-family: inherit; transition: all .15s;
     }
-    #btnClear:hover { border-color: #9CA3AF; color: var(--teks); }
-
-    .filter-row {
-      display: flex; gap: .5rem; flex-wrap: wrap;
-      margin-top: .75rem; align-items: center;
-    }
+    .btn-secondary:hover { border-color: #9CA3AF; color: var(--teks); }
+    .filter-row { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .75rem; align-items: center; }
     .filter-label { font-size: .78rem; color: var(--teks-sekunder); white-space: nowrap; }
-    select#filterSkpd, select#filterStatus {
+    select {
       font-family: inherit; font-size: .82rem;
       border: 1.5px solid var(--abu-garis); border-radius: 6px;
-      padding: .35rem .6rem; color: var(--teks);
-      background: #fff; cursor: pointer;
-      outline: none; max-width: 280px;
+      padding: .35rem .6rem; color: var(--teks); background: #fff; cursor: pointer; outline: none;
     }
-    select#filterSkpd:focus, select#filterStatus:focus { border-color: var(--biru-muda); }
+    select:focus { border-color: var(--biru-muda); }
 
     /* ─── STATUS BAR ─── */
-    #statusBar {
-      font-size: .82rem; color: var(--teks-sekunder);
-      margin-bottom: .75rem; min-height: 1.2em;
-    }
+    #statusBar { font-size: .82rem; color: var(--teks-sekunder); margin-bottom: .75rem; min-height: 1.2em; }
     #statusBar strong { color: var(--biru-tua); }
 
-    /* ─── RESULTS ─── */
+    /* ─── RESULT CARDS ─── */
     .results-grid { display: grid; gap: .75rem; }
-
     .pegawai-card {
-      background: var(--putih);
-      border: 1px solid var(--abu-garis);
-      border-radius: 10px;
-      padding: 1rem 1.25rem;
-      cursor: pointer;
-      transition: box-shadow .15s, border-color .15s;
-      position: relative;
+      background: var(--putih); border: 1px solid var(--abu-garis);
+      border-radius: 10px; padding: 1rem 1.25rem;
+      cursor: pointer; transition: box-shadow .15s, border-color .15s; position: relative;
     }
-    .pegawai-card:hover {
-      box-shadow: 0 4px 14px rgba(0,0,0,.09);
-      border-color: #CBD5E1;
-    }
+    .pegawai-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.09); border-color: #CBD5E1; }
     .card-header { display: flex; align-items: flex-start; gap: .75rem; }
     .avatar {
       width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
       background: var(--biru-tua); color: #fff;
       display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: .95rem; letter-spacing: -.5px;
+      font-weight: 700; font-size: .95rem;
     }
     .card-name { font-weight: 700; font-size: .95rem; line-height: 1.3; }
     .card-nip  { font-size: .75rem; color: var(--teks-sekunder); margin-top: 1px; font-family: monospace; }
-    .badge {
-      display: inline-block; font-size: .68rem; font-weight: 600;
-      padding: 1px 7px; border-radius: 99px;
-      margin-left: .4rem; vertical-align: middle;
-    }
+    .badge { display: inline-block; font-size: .68rem; font-weight: 600; padding: 1px 7px; border-radius: 99px; margin-left: .4rem; }
     .badge-pns  { background: #DBEAFE; color: #1E40AF; }
     .badge-pppk { background: #D1FAE5; color: #065F46; }
-    .badge-cpns { background: #FEF3C7; color: #92400E; }
-
-    .card-meta {
-      display: flex; flex-wrap: wrap; gap: .25rem .75rem;
-      margin-top: .5rem; font-size: .78rem; color: var(--teks-sekunder);
-    }
-    .card-meta span { display: flex; align-items: center; gap: 3px; }
-    .card-skpd {
-      font-size: .72rem; color: var(--teks-sekunder);
-      margin-top: .4rem;
-      border-top: 1px dashed var(--abu-garis);
-      padding-top: .4rem;
-      display: flex; align-items: center; gap: 4px;
-    }
-
-    .expand-icon {
-      position: absolute; right: 1rem; top: 1rem;
-      color: var(--abu-garis); font-size: 1.1rem; transition: transform .2s;
-    }
+    .card-meta { display: flex; flex-wrap: wrap; gap: .25rem .75rem; margin-top: .5rem; font-size: .78rem; color: var(--teks-sekunder); }
+    .card-skpd { font-size: .72rem; color: var(--teks-sekunder); margin-top: .4rem; border-top: 1px dashed var(--abu-garis); padding-top: .4rem; }
+    .expand-icon { position: absolute; right: 1rem; top: 1rem; color: var(--abu-garis); font-size: 1.1rem; transition: transform .2s; }
     .pegawai-card.open .expand-icon { transform: rotate(180deg); color: var(--biru-muda); }
-
-    /* ─── DETAIL PANEL ─── */
-    .detail-panel {
-      display: none; margin-top: .75rem;
-      border-top: 1px solid var(--abu-garis);
-      padding-top: .75rem;
-    }
+    .detail-panel { display: none; margin-top: .75rem; border-top: 1px solid var(--abu-garis); padding-top: .75rem; }
     .pegawai-card.open .detail-panel { display: block; }
-
     .detail-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     @media (max-width: 600px) { .detail-sections { grid-template-columns: 1fr; } }
-
-    .detail-section { }
-    .detail-section h4 {
-      font-size: .7rem; font-weight: 700; color: var(--biru-tua);
-      text-transform: uppercase; letter-spacing: .05em;
-      margin-bottom: .4rem;
-    }
+    .detail-section h4 { font-size: .7rem; font-weight: 700; color: var(--biru-tua); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .4rem; }
     .detail-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
-    .detail-table tr td { padding: .22rem .1rem; vertical-align: top; }
-    .detail-table tr td:first-child {
-      color: var(--teks-sekunder); width: 44%; padding-right: .5rem;
-      white-space: nowrap;
-    }
-    .detail-table tr td:last-child { font-weight: 500; }
-    .gaji-row { background: var(--emas-muda); font-weight: 700; }
-    .gaji-row td { padding: .3rem .25rem !important; }
+    .detail-table td { padding: .22rem .1rem; vertical-align: top; }
+    .detail-table td:first-child { color: var(--teks-sekunder); width: 44%; padding-right: .5rem; }
+    .detail-table td:last-child { font-weight: 500; }
+    .gaji-row td { background: var(--emas-muda); padding: .3rem .25rem !important; }
 
     /* ─── PAGINATION ─── */
-    #pagination {
-      display: flex; justify-content: center; gap: .4rem;
-      flex-wrap: wrap; margin-top: 1rem;
-    }
+    #pagination { display: flex; justify-content: center; gap: .4rem; flex-wrap: wrap; margin-top: 1rem; }
     .pg-btn {
-      border: 1.5px solid var(--abu-garis); background: #fff;
-      border-radius: 6px; padding: .35rem .7rem;
-      font-size: .82rem; cursor: pointer; font-family: inherit;
-      transition: all .12s;
+      border: 1.5px solid var(--abu-garis); background: #fff; border-radius: 6px;
+      padding: .35rem .7rem; font-size: .82rem; cursor: pointer; font-family: inherit; transition: all .12s;
     }
     .pg-btn:hover { border-color: var(--biru-muda); color: var(--biru-muda); }
     .pg-btn.active { background: var(--biru-tua); color: #fff; border-color: var(--biru-tua); }
@@ -218,22 +156,82 @@
     /* ─── EMPTY / LOADING ─── */
     .empty { text-align: center; padding: 3rem; color: var(--teks-sekunder); }
     .empty p { margin-top: .5rem; font-size: .85rem; }
-    .loading-bar {
-      height: 3px; background: var(--biru-muda);
-      border-radius: 99px; width: 0;
-      animation: load 1s ease forwards;
-    }
+    .loading-bar { height: 3px; background: var(--biru-muda); border-radius: 99px; width: 0; animation: load 1.2s ease forwards; }
     @keyframes load { to { width: 100%; } }
-
-    /* ─── FOOTER ─── */
-    footer {
-      text-align: center; padding: 1.5rem;
-      font-size: .72rem; color: var(--teks-sekunder);
-      border-top: 1px solid var(--abu-garis);
-      margin-top: 1rem;
-    }
-
     mark { background: #FEF08A; border-radius: 2px; padding: 0 1px; }
+
+    /* ─── ADMIN PAGE ─── */
+    .upload-area {
+      border: 2.5px dashed var(--abu-garis); border-radius: 12px;
+      padding: 2.5rem 1.5rem; text-align: center; cursor: pointer;
+      transition: all .2s; background: var(--abu);
+    }
+    .upload-area:hover, .upload-area.drag-over {
+      border-color: var(--biru-muda); background: #EFF6FF;
+    }
+    .upload-icon { font-size: 2.5rem; margin-bottom: .75rem; }
+    .upload-area h3 { font-size: 1rem; font-weight: 700; color: var(--biru-tua); margin-bottom: .3rem; }
+    .upload-area p  { font-size: .82rem; color: var(--teks-sekunder); }
+    .upload-area .hint { font-size: .75rem; color: #9CA3AF; margin-top: .5rem; }
+    #fileInput { display: none; }
+
+    .tipe-selector { display: flex; gap: .75rem; margin-bottom: 1.25rem; }
+    .tipe-btn {
+      flex: 1; padding: .75rem; border-radius: 10px; cursor: pointer;
+      border: 2px solid var(--abu-garis); background: #fff; font-family: inherit;
+      text-align: center; transition: all .15s;
+    }
+    .tipe-btn:hover { border-color: var(--biru-muda); }
+    .tipe-btn.active { border-color: var(--biru-muda); background: #EFF6FF; }
+    .tipe-btn .tipe-label { font-weight: 700; font-size: .9rem; color: var(--biru-tua); }
+    .tipe-btn .tipe-desc  { font-size: .72rem; color: var(--teks-sekunder); margin-top: 2px; }
+    .tipe-btn.active .tipe-label { color: var(--biru-muda); }
+
+    /* Preview table */
+    .preview-wrap { overflow-x: auto; margin-top: 1rem; border-radius: 8px; border: 1px solid var(--abu-garis); }
+    .preview-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+    .preview-table th { background: var(--biru-tua); color: #fff; padding: .45rem .6rem; text-align: left; white-space: nowrap; font-weight: 600; }
+    .preview-table td { padding: .4rem .6rem; border-bottom: 1px solid var(--abu-garis); white-space: nowrap; }
+    .preview-table tr:last-child td { border-bottom: none; }
+    .preview-table tr:nth-child(even) td { background: var(--abu); }
+
+    /* Progress & alert */
+    .alert {
+      border-radius: 8px; padding: .75rem 1rem; font-size: .85rem;
+      display: flex; align-items: flex-start; gap: .6rem; margin-top: .75rem;
+    }
+    .alert-info    { background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; }
+    .alert-success { background: var(--hijau-muda); color: #15803D; border: 1px solid #86EFAC; }
+    .alert-error   { background: var(--merah-muda); color: #991B1B; border: 1px solid #FCA5A5; }
+    .alert-warning { background: var(--emas-muda); color: #92400E; border: 1px solid #FCD34D; }
+
+    .progress-bar-wrap { background: var(--abu-garis); border-radius: 99px; height: 6px; margin-top: .5rem; overflow: hidden; }
+    .progress-bar { height: 100%; background: var(--biru-muda); border-radius: 99px; transition: width .3s; width: 0%; }
+
+    .stats-row { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1rem; }
+    .stat-box {
+      flex: 1; min-width: 130px; background: var(--abu); border-radius: 8px;
+      padding: .75rem 1rem; text-align: center;
+    }
+    .stat-num  { font-size: 1.4rem; font-weight: 700; color: var(--biru-tua); }
+    .stat-lbl  { font-size: .72rem; color: var(--teks-sekunder); margin-top: 2px; }
+
+    .btn-success {
+      background: var(--hijau); color: #fff; border: none;
+      border-radius: 8px; padding: .7rem 2rem;
+      font-size: .95rem; font-weight: 700; cursor: pointer; font-family: inherit;
+      transition: background .15s; display: inline-flex; align-items: center; gap: .4rem;
+    }
+    .btn-success:hover { background: #15803D; }
+    .btn-success:disabled { background: #9CA3AF; cursor: not-allowed; }
+
+    .download-link {
+      display: inline-flex; align-items: center; gap: .4rem;
+      color: var(--biru-muda); font-size: .82rem; text-decoration: none; font-weight: 600;
+    }
+    .download-link:hover { text-decoration: underline; }
+
+    footer { text-align: center; padding: 1.5rem; font-size: .72rem; color: var(--teks-sekunder); border-top: 1px solid var(--abu-garis); margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -248,37 +246,132 @@
   </div>
 </header>
 
+<nav>
+  <div class="nav-inner">
+    <button class="nav-tab active" onclick="showPage('search', this)">🔍 Cari Pegawai</button>
+    <button class="nav-tab" onclick="showPage('admin', this)">⚙️ Update Database</button>
+  </div>
+</nav>
+
 <main>
-  <div class="search-card">
-    <label class="search-label" for="searchInput">Cari Pegawai</label>
-    <div class="search-row">
-      <div class="search-input-wrap">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-        </svg>
-        <input type="text" id="searchInput"
-          placeholder="Ketik NIK, NIP, atau Nama Pegawai…"
-          autocomplete="off" spellcheck="false" />
+
+  <!-- ══════════════ PAGE: SEARCH ══════════════ -->
+  <div id="page-search" class="page active">
+    <div class="card">
+      <label class="card-title" for="searchInput">🔍 Cari Pegawai</label>
+      <div class="search-row">
+        <div class="search-input-wrap">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Ketik NIK, NIP, atau Nama Pegawai…" autocomplete="off" spellcheck="false" />
+        </div>
+        <button class="btn-primary" id="btnSearch">Cari</button>
+        <button class="btn-secondary" id="btnClear">Reset</button>
       </div>
-      <button id="btnSearch">Cari</button>
-      <button id="btnClear">Reset</button>
+      <div class="filter-row">
+        <span class="filter-label">Filter:</span>
+        <select id="filterStatus">
+          <option value="">Semua Status ASN</option>
+          <option value="1">PNS</option>
+          <option value="3">PPPK</option>
+        </select>
+        <select id="filterSkpd"><option value="">Semua SKPD</option></select>
+      </div>
     </div>
-    <div class="filter-row">
-      <span class="filter-label">Filter:</span>
-      <select id="filterStatus">
-        <option value="">Semua Status ASN</option>
-        <option value="1">PNS</option>
-        <option value="3">PPPK / CPNS</option>
-      </select>
-      <select id="filterSkpd">
-        <option value="">Semua SKPD</option>
-      </select>
-    </div>
+    <div id="statusBar"></div>
+    <div id="resultsContainer"></div>
+    <div id="pagination"></div>
   </div>
 
-  <div id="statusBar"></div>
-  <div id="resultsContainer"></div>
-  <div id="pagination"></div>
+  <!-- ══════════════ PAGE: ADMIN ══════════════ -->
+  <div id="page-admin" class="page">
+
+    <div class="card">
+      <div class="card-title">⚙️ Update Database Pegawai</div>
+      <p style="font-size:.85rem;color:var(--teks-sekunder);margin-bottom:1rem">
+        Upload file Excel dari SIPDRI untuk memperbarui data. File akan diproses di browser — tidak ada data yang dikirim ke server.
+      </p>
+
+      <!-- Pilih tipe -->
+      <p style="font-size:.8rem;font-weight:600;color:var(--teks);margin-bottom:.5rem">1. Pilih jenis pegawai yang akan diupdate:</p>
+      <div class="tipe-selector">
+        <button class="tipe-btn active" id="btnPNS" onclick="selectTipe('pns')">
+          <div class="tipe-label">👔 PNS</div>
+          <div class="tipe-desc">Pegawai Negeri Sipil<br><small id="infoPNS" style="color:var(--hijau)"></small></div>
+        </button>
+        <button class="tipe-btn" id="btnPPPK" onclick="selectTipe('pppk')">
+          <div class="tipe-label">📋 PPPK</div>
+          <div class="tipe-desc">Pegawai Pemerintah dengan<br>Perjanjian Kerja<br><small id="infoPPPK" style="color:var(--hijau)"></small></div>
+        </button>
+      </div>
+
+      <!-- Upload area -->
+      <p style="font-size:.8rem;font-weight:600;color:var(--teks);margin-bottom:.5rem">2. Upload file Excel (.xlsx):</p>
+      <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-icon">📂</div>
+        <h3>Klik atau seret file Excel ke sini</h3>
+        <p>Format: <strong>.xlsx</strong> dari SIPDRI (SIPDRI0231109XXXXXX_PNS.xlsx / _PPPK.xlsx)</p>
+        <div class="hint">File diproses lokal di browser — data tidak dikirim ke internet</div>
+      </div>
+      <input type="file" id="fileInput" accept=".xlsx,.xls" />
+
+      <div id="adminStatus"></div>
+    </div>
+
+    <!-- Preview & Konfirmasi -->
+    <div class="card" id="previewCard" style="display:none">
+      <div class="card-title">📋 Preview Data</div>
+      <div class="stats-row" id="statsRow"></div>
+      <div class="preview-wrap" id="previewWrap"></div>
+
+      <div style="margin-top:1.25rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+        <button class="btn-success" id="btnSimpan" onclick="simpanData()">
+          💾 Simpan & Update Database
+        </button>
+        <button class="btn-secondary" onclick="resetAdmin()">✕ Batal</button>
+        <span id="simpanStatus" style="font-size:.82rem;color:var(--teks-sekunder)"></span>
+      </div>
+
+      <div id="downloadWrap" style="display:none;margin-top:1rem">
+        <div class="alert alert-success">
+          ✅ <div>
+            <strong>Database berhasil diperbarui!</strong><br>
+            <span id="downloadMsg"></span>
+          </div>
+        </div>
+        <div style="margin-top:.75rem;padding:.75rem;background:var(--emas-muda);border-radius:8px;font-size:.82rem;color:#92400E">
+          <strong>⚠️ Langkah selanjutnya:</strong> Download file JSON di bawah, lalu upload ke GitHub untuk memperbarui website.
+        </div>
+        <div style="margin-top:.75rem;display:flex;gap:.75rem;flex-wrap:wrap">
+          <a id="downloadLink" href="#" download class="btn-success" style="text-decoration:none">📥 Download pegawai_pns.json</a>
+          <a id="downloadLinkAll" href="#" download class="btn-primary" style="text-decoration:none;padding:.7rem 1.4rem;font-size:.85rem;font-weight:600;border-radius:8px;color:#fff">📥 Download pegawai.json (gabungan)</a>
+        </div>
+        <div style="margin-top:.75rem;font-size:.78rem;color:var(--teks-sekunder)">
+          Upload <strong>pegawai.json</strong> ke folder <code>public/</code> di repository GitHub Anda → Vercel otomatis deploy ulang.
+        </div>
+      </div>
+    </div>
+
+    <!-- Panduan -->
+    <div class="card">
+      <div class="card-title">📖 Panduan Update Database</div>
+      <div style="font-size:.82rem;line-height:1.7;color:var(--teks-sekunder)">
+        <p style="margin-bottom:.5rem"><strong style="color:var(--teks)">Langkah update data:</strong></p>
+        <ol style="padding-left:1.2rem;display:flex;flex-direction:column;gap:.3rem">
+          <li>Pilih jenis pegawai (PNS atau PPPK) sesuai file yang akan diupload</li>
+          <li>Upload file <code>.xlsx</code> hasil export dari SIPDRI</li>
+          <li>Periksa preview dan statistik data</li>
+          <li>Klik <strong>"Simpan & Update Database"</strong></li>
+          <li>Download file <strong>pegawai.json</strong> yang dihasilkan</li>
+          <li>Upload file tersebut ke GitHub: <code>public/pegawai.json</code></li>
+          <li>Tunggu ±30 detik → website otomatis terupdate</li>
+        </ol>
+        <p style="margin-top:.75rem"><strong style="color:var(--teks)">Catatan:</strong> Data PNS dan PPPK digabung otomatis dalam file <code>pegawai.json</code>. Upload PNS dulu, lalu PPPK — keduanya akan tergabung.</p>
+      </div>
+    </div>
+
+  </div>
 </main>
 
 <footer>
@@ -286,168 +379,126 @@
 </footer>
 
 <script>
-// ─── CONFIG ───
+// ══════════════════════════════════════════════
+// SEARCH PAGE
+// ══════════════════════════════════════════════
 const PAGE_SIZE = 15;
-let allData   = [];
-let filtered  = [];
-let currentPage = 1;
-let currentQuery = '';
+let allData = [], filtered = [], currentPage = 1, currentQuery = '';
 
-// ─── FORMAT CURRENCY ───
-function rupiah(n) {
-  const num = parseInt(n) || 0;
-  return 'Rp ' + num.toLocaleString('id-ID');
-}
-
-// ─── STATUS LABELS ───
+function rupiah(n) { return 'Rp ' + (parseInt(n)||0).toLocaleString('id-ID'); }
 function statusLabel(s) {
-  if (s === '1') return '<span class="badge badge-pns">PNS</span>';
-  if (s === '3') return '<span class="badge badge-pppk">PPPK</span>';
-  return '<span class="badge badge-cpns">' + s + '</span>';
+  if (s==='1') return '<span class="badge badge-pns">PNS</span>';
+  return '<span class="badge badge-pppk">PPPK</span>';
 }
-
-function nikahLabel(s) {
-  return s === '1' ? 'Menikah' : 'Tidak Menikah / Janda / Duda';
-}
-
-// ─── AVATAR INITIALS ───
+function nikahLabel(s) { return s==='1' ? 'Menikah' : 'Tidak Menikah / Janda / Duda'; }
 function initials(nama) {
-  const parts = nama.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0][0];
-  return parts[0][0] + parts[1][0];
+  const p = nama.trim().split(/\s+/);
+  return p.length===1 ? p[0][0] : p[0][0]+p[1][0];
+}
+function highlight(text, q) {
+  if (!q) return text;
+  return text.replace(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'), m=>`<mark>${m}</mark>`);
 }
 
-// ─── HIGHLIGHT MATCH ───
-function highlight(text, query) {
-  if (!query) return text;
-  const esc = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return text.replace(new RegExp(esc, 'gi'), m => `<mark>${m}</mark>`);
-}
-
-// ─── LOAD DATA ───
 async function loadData() {
-  const container = document.getElementById('resultsContainer');
-  container.innerHTML = '<div class="search-card"><div class="loading-bar"></div><p style="font-size:.82rem;color:#6B7280;margin-top:.5rem">Memuat data pegawai…</p></div>';
+  const c = document.getElementById('resultsContainer');
+  c.innerHTML = '<div class="card"><div class="loading-bar"></div><p style="font-size:.82rem;color:#6B7280;margin-top:.5rem">Memuat data pegawai…</p></div>';
   try {
     const res = await fetch('pegawai.json');
     allData = await res.json();
     buildSkpdFilter();
-    container.innerHTML = '';
+    c.innerHTML = '';
     document.getElementById('statusBar').innerHTML =
       `Data siap: <strong>${allData.length.toLocaleString('id-ID')}</strong> pegawai dimuat. Silakan mulai pencarian.`;
+    updateAdminInfo();
   } catch(e) {
-    container.innerHTML = '<div class="empty">⚠️ Gagal memuat data. Pastikan file <code>pegawai.json</code> tersedia.<p>' + e.message + '</p></div>';
+    c.innerHTML = '<div class="empty">⚠️ Gagal memuat data.<p>'+e.message+'</p></div>';
   }
 }
 
 function buildSkpdFilter() {
-  const skpds = [...new Set(allData.map(d => d.skpd))].sort();
+  const skpds = [...new Set(allData.map(d=>d.skpd))].sort();
   const sel = document.getElementById('filterSkpd');
-  skpds.forEach(s => {
-    const opt = document.createElement('option');
-    opt.value = s; opt.textContent = s;
-    sel.appendChild(opt);
-  });
+  sel.innerHTML = '<option value="">Semua SKPD</option>';
+  skpds.forEach(s=>{ const o=document.createElement('option'); o.value=o.textContent=s; sel.appendChild(o); });
 }
 
-// ─── SEARCH ───
+function updateAdminInfo() {
+  const pns  = allData.filter(d=>d.status_asn==='1').length;
+  const pppk = allData.filter(d=>d.status_asn==='3').length;
+  document.getElementById('infoPNS').textContent  = pns  ? `${pns.toLocaleString('id-ID')} data aktif` : '';
+  document.getElementById('infoPPPK').textContent = pppk ? `${pppk.toLocaleString('id-ID')} data aktif` : '';
+}
+
 function doSearch() {
-  const q      = document.getElementById('searchInput').value.trim();
-  const skpd   = document.getElementById('filterSkpd').value;
+  const q = document.getElementById('searchInput').value.trim();
+  const skpd = document.getElementById('filterSkpd').value;
   const status = document.getElementById('filterStatus').value;
-  currentQuery = q;
-  currentPage  = 1;
+  currentQuery = q; currentPage = 1;
 
   if (!q && !skpd && !status) {
     document.getElementById('resultsContainer').innerHTML = '';
     document.getElementById('statusBar').innerHTML =
       `Data siap: <strong>${allData.length.toLocaleString('id-ID')}</strong> pegawai dimuat. Silakan mulai pencarian.`;
     document.getElementById('pagination').innerHTML = '';
-    filtered = [];
-    return;
+    filtered = []; return;
   }
-
   const ql = q.toLowerCase();
   filtered = allData.filter(d => {
-    const matchQ = !q ||
-      d.nip.includes(q) ||
-      d.nik.includes(q) ||
-      d.nama.toLowerCase().includes(ql);
-    const matchSkpd   = !skpd   || d.skpd === skpd;
-    const matchStatus = !status || d.status_asn === status;
-    return matchQ && matchSkpd && matchStatus;
+    const mQ = !q || d.nip.includes(q) || d.nik.includes(q) || d.nama.toLowerCase().includes(ql);
+    return mQ && (!skpd||d.skpd===skpd) && (!status||d.status_asn===status);
   });
-
   renderPage();
 }
 
-// ─── RENDER PAGE ───
 function renderPage() {
-  const container = document.getElementById('resultsContainer');
-  const status    = document.getElementById('statusBar');
-  const total = filtered.length;
-  const start = (currentPage - 1) * PAGE_SIZE;
-  const slice = filtered.slice(start, start + PAGE_SIZE);
+  const c = document.getElementById('resultsContainer');
+  const total = filtered.length, start = (currentPage-1)*PAGE_SIZE;
+  const slice = filtered.slice(start, start+PAGE_SIZE);
+  document.getElementById('statusBar').innerHTML = total===0
+    ? 'Hasil: <strong>0</strong> pegawai ditemukan.'
+    : `Menampilkan <strong>${start+1}–${Math.min(start+PAGE_SIZE,total)}</strong> dari <strong>${total.toLocaleString('id-ID')}</strong> hasil.`;
 
-  if (total === 0) {
-    container.innerHTML = '<div class="empty">🔍 Tidak ditemukan data yang sesuai.<p>Coba kata kunci lain atau ubah filter.</p></div>';
-    status.innerHTML = 'Hasil: <strong>0</strong> pegawai ditemukan.';
-    document.getElementById('pagination').innerHTML = '';
-    return;
-  }
-
-  status.innerHTML = `Menampilkan <strong>${start+1}–${Math.min(start+PAGE_SIZE, total)}</strong> dari <strong>${total.toLocaleString('id-ID')}</strong> hasil.`;
-
-  container.innerHTML = '';
-  const grid = document.createElement('div');
-  grid.className = 'results-grid';
-
-  slice.forEach((d, idx) => {
-    const card = document.createElement('div');
-    card.className = 'pegawai-card';
-    card.innerHTML = `
+  if (total===0) { c.innerHTML='<div class="empty">🔍 Tidak ditemukan.<p>Coba kata kunci lain atau ubah filter.</p></div>'; document.getElementById('pagination').innerHTML=''; return; }
+  c.innerHTML='';
+  const grid = document.createElement('div'); grid.className='results-grid';
+  slice.forEach(d => {
+    const card = document.createElement('div'); card.className='pegawai-card';
+    card.innerHTML=`
       <span class="expand-icon">▼</span>
       <div class="card-header">
         <div class="avatar">${initials(d.nama)}</div>
         <div>
-          <div class="card-name">${highlight(d.nama, currentQuery)} ${statusLabel(d.status_asn)}</div>
-          <div class="card-nip">NIP: ${highlight(d.nip, currentQuery)} &nbsp;|&nbsp; NIK: ${highlight(d.nik, currentQuery)}</div>
-          <div class="card-meta">
-            <span>🎖 ${d.golongan}</span>
-            <span>💼 ${d.jabatan || '—'}</span>
-            <span>📅 Lahir: ${d.tgl_lahir}</span>
-          </div>
+          <div class="card-name">${highlight(d.nama,currentQuery)} ${statusLabel(d.status_asn)}</div>
+          <div class="card-nip">NIP: ${highlight(d.nip,currentQuery)} &nbsp;|&nbsp; NIK: ${highlight(d.nik,currentQuery)}</div>
+          <div class="card-meta"><span>🎖 ${d.golongan}</span><span>💼 ${d.jabatan||'—'}</span><span>📅 ${d.tgl_lahir}</span></div>
         </div>
       </div>
       <div class="card-skpd">🏛 ${d.skpd}</div>
-
       <div class="detail-panel">
         <div class="detail-sections">
-          <div class="detail-section">
-            <h4>Data Pribadi</h4>
+          <div class="detail-section"><h4>Data Pribadi</h4>
             <table class="detail-table">
               <tr><td>NIK</td><td>${d.nik}</td></tr>
               <tr><td>NIP</td><td>${d.nip}</td></tr>
-              <tr><td>NPWP</td><td>${d.npwp || '—'}</td></tr>
+              <tr><td>NPWP</td><td>${d.npwp||'—'}</td></tr>
               <tr><td>Tgl Lahir</td><td>${d.tgl_lahir}</td></tr>
               <tr><td>Status Nikah</td><td>${nikahLabel(d.status_nikah)}</td></tr>
-              <tr><td>Alamat</td><td>${d.alamat || '—'}</td></tr>
+              <tr><td>Alamat</td><td>${d.alamat||'—'}</td></tr>
             </table>
           </div>
-          <div class="detail-section">
-            <h4>Data Kepegawaian</h4>
+          <div class="detail-section"><h4>Kepegawaian</h4>
             <table class="detail-table">
               <tr><td>Golongan</td><td>${d.golongan}</td></tr>
-              <tr><td>Masa Kerja Gol.</td><td>${d.masa_kerja} tahun</td></tr>
-              <tr><td>Jabatan</td><td>${d.jabatan || '—'}</td></tr>
-              <tr><td>Eselon</td><td>${d.eselon || '—'}</td></tr>
-              <tr><td>Status ASN</td><td>${d.status_asn === '1' ? 'PNS' : 'PPPK'}</td></tr>
+              <tr><td>Masa Kerja</td><td>${d.masa_kerja} tahun</td></tr>
+              <tr><td>Jabatan</td><td>${d.jabatan||'—'}</td></tr>
+              <tr><td>Eselon</td><td>${d.eselon||'—'}</td></tr>
+              <tr><td>Status ASN</td><td>${d.status_asn==='1'?'PNS':'PPPK'}</td></tr>
               <tr><td>Bank</td><td>${d.bank}</td></tr>
-              <tr><td>No. Rekening</td><td>${d.rekening}</td></tr>
+              <tr><td>Rekening</td><td>${d.rekening}</td></tr>
             </table>
           </div>
-          <div class="detail-section">
-            <h4>Gaji & Tunjangan</h4>
+          <div class="detail-section"><h4>Gaji & Tunjangan</h4>
             <table class="detail-table">
               <tr><td>Gaji Pokok</td><td>${rupiah(d.gaji_pokok)}</td></tr>
               <tr><td>Tunj. Keluarga</td><td>${rupiah(d.tunjangan_keluarga)}</td></tr>
@@ -458,72 +509,262 @@ function renderPage() {
               <tr><td>Total Bruto</td><td><strong>${rupiah(d.jumlah_gaji)}</strong></td></tr>
             </table>
           </div>
-          <div class="detail-section">
-            <h4>Potongan & Transfer</h4>
+          <div class="detail-section"><h4>Potongan & Transfer</h4>
             <table class="detail-table">
               <tr><td>Total Potongan</td><td>${rupiah(d.jumlah_potongan)}</td></tr>
               <tr class="gaji-row"><td><strong>Gaji Ditransfer</strong></td><td><strong>${rupiah(d.jumlah_transfer)}</strong></td></tr>
             </table>
           </div>
         </div>
-      </div>
-    `;
-
-    card.addEventListener('click', () => {
-      card.classList.toggle('open');
-    });
-
+      </div>`;
+    card.addEventListener('click', ()=>card.classList.toggle('open'));
     grid.appendChild(card);
   });
-
-  container.appendChild(grid);
+  c.appendChild(grid);
   renderPagination(total);
 }
 
-// ─── PAGINATION ───
 function renderPagination(total) {
-  const totalPages = Math.ceil(total / PAGE_SIZE);
-  const pg = document.getElementById('pagination');
-  pg.innerHTML = '';
-  if (totalPages <= 1) return;
-
-  const makeBtn = (label, page, disabled, active) => {
-    const btn = document.createElement('button');
-    btn.className = 'pg-btn' + (active ? ' active' : '');
-    btn.textContent = label;
-    btn.disabled = disabled;
-    btn.onclick = () => { currentPage = page; renderPage(); window.scrollTo({top:0, behavior:'smooth'}); };
-    return btn;
+  const totalPages = Math.ceil(total/PAGE_SIZE);
+  const pg = document.getElementById('pagination'); pg.innerHTML='';
+  if (totalPages<=1) return;
+  const mkBtn = (lbl,page,dis,act) => {
+    const b=document.createElement('button'); b.className='pg-btn'+(act?' active':'');
+    b.textContent=lbl; b.disabled=dis;
+    b.onclick=()=>{ currentPage=page; renderPage(); window.scrollTo({top:0,behavior:'smooth'}); };
+    return b;
   };
-
-  pg.appendChild(makeBtn('‹ Prev', currentPage - 1, currentPage === 1, false));
-
-  let start = Math.max(1, currentPage - 2);
-  let end   = Math.min(totalPages, start + 4);
-  if (end - start < 4) start = Math.max(1, end - 4);
-
-  if (start > 1) { pg.appendChild(makeBtn('1', 1, false, false)); if (start > 2) pg.appendChild(Object.assign(document.createElement('span'), {textContent:'…', style:'padding:.35rem .3rem;font-size:.82rem;color:#9CA3AF'})); }
-  for (let i = start; i <= end; i++) pg.appendChild(makeBtn(i, i, false, i === currentPage));
-  if (end < totalPages) { if (end < totalPages-1) pg.appendChild(Object.assign(document.createElement('span'), {textContent:'…', style:'padding:.35rem .3rem;font-size:.82rem;color:#9CA3AF'})); pg.appendChild(makeBtn(totalPages, totalPages, false, false)); }
-
-  pg.appendChild(makeBtn('Next ›', currentPage + 1, currentPage === totalPages, false));
+  pg.appendChild(mkBtn('‹',currentPage-1,currentPage===1,false));
+  let s=Math.max(1,currentPage-2), e=Math.min(totalPages,s+4);
+  if(e-s<4) s=Math.max(1,e-4);
+  if(s>1){pg.appendChild(mkBtn('1',1,false,false));if(s>2)pg.appendChild(Object.assign(document.createElement('span'),{textContent:'…',style:'padding:.35rem .3rem;font-size:.82rem;color:#9CA3AF'}));}
+  for(let i=s;i<=e;i++) pg.appendChild(mkBtn(i,i,false,i===currentPage));
+  if(e<totalPages){if(e<totalPages-1)pg.appendChild(Object.assign(document.createElement('span'),{textContent:'…',style:'padding:.35rem .3rem;font-size:.82rem;color:#9CA3AF'}));pg.appendChild(mkBtn(totalPages,totalPages,false,false));}
+  pg.appendChild(mkBtn('›',currentPage+1,currentPage===totalPages,false));
 }
 
-// ─── EVENTS ───
 document.getElementById('btnSearch').addEventListener('click', doSearch);
-document.getElementById('btnClear').addEventListener('click', () => {
-  document.getElementById('searchInput').value = '';
-  document.getElementById('filterSkpd').value  = '';
-  document.getElementById('filterStatus').value = '';
-  doSearch();
-});
-document.getElementById('searchInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doSearch();
-});
+document.getElementById('btnClear').addEventListener('click', ()=>{ document.getElementById('searchInput').value=''; document.getElementById('filterSkpd').value=''; document.getElementById('filterStatus').value=''; doSearch(); });
+document.getElementById('searchInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(); });
 document.getElementById('filterSkpd').addEventListener('change', doSearch);
 document.getElementById('filterStatus').addEventListener('change', doSearch);
 
+
+// ══════════════════════════════════════════════
+// ADMIN PAGE
+// ══════════════════════════════════════════════
+let selectedTipe = 'pns';
+let parsedData   = [];
+let dataPNS      = [];
+let dataPPPK     = [];
+
+// Kolom mapping dari Excel SIPDRI → JSON internal
+const KOLOM_MAP = {
+  nip_pegawai:                  'nip',
+  nama_pegawai:                 'nama',
+  nik_pegawai:                  'nik',
+  npwp_pegawai:                 'npwp',
+  tanggal_lahir_pegawai:        'tgl_lahir',
+  nama_jabatan:                 'jabatan',
+  eselon:                       'eselon',
+  status_asn:                   'status_asn',
+  golongan:                     'golongan',
+  masa_kerja_golongan:          'masa_kerja',
+  alamat:                       'alamat',
+  status_pernikahan:            'status_nikah',
+  nama_bank:                    'bank',
+  nomor_rekening_bank_pegawai:  'rekening',
+  gaji_pokok:                   'gaji_pokok',
+  tunjangan_keluarga:           'tunjangan_keluarga',
+  tunjangan_jabatan:            'tunjangan_jabatan',
+  tunjangan_fungsional:         'tunjangan_fungsional',
+  tunjangan_fungsional_umum:    'tunjangan_fungsional_umum',
+  tunjangan_beras:              'tunjangan_beras',
+  jumlah_gaji_dan_tunjangan:    'jumlah_gaji',
+  jumlah_potongan:              'jumlah_potongan',
+  jumlah_ditransfer:            'jumlah_transfer',
+  skpd:                         'skpd',
+};
+
+function selectTipe(tipe) {
+  selectedTipe = tipe;
+  document.getElementById('btnPNS').classList.toggle('active', tipe==='pns');
+  document.getElementById('btnPPPK').classList.toggle('active', tipe==='pppk');
+  resetAdmin();
+}
+
+function showPage(page, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Drag & Drop
+const uploadArea = document.getElementById('uploadArea');
+uploadArea.addEventListener('dragover', e=>{ e.preventDefault(); uploadArea.classList.add('drag-over'); });
+uploadArea.addEventListener('dragleave', ()=>uploadArea.classList.remove('drag-over'));
+uploadArea.addEventListener('drop', e=>{ e.preventDefault(); uploadArea.classList.remove('drag-over'); const f=e.dataTransfer.files[0]; if(f) prosesFile(f); });
+document.getElementById('fileInput').addEventListener('change', e=>{ if(e.target.files[0]) prosesFile(e.target.files[0]); });
+
+function setAdminStatus(msg, type='info') {
+  document.getElementById('adminStatus').innerHTML =
+    `<div class="alert alert-${type}"><span>${msg}</span></div>`;
+}
+
+function prosesFile(file) {
+  if (!file.name.match(/\.(xlsx|xls)$/i)) {
+    setAdminStatus('⚠️ Format file tidak didukung. Gunakan file .xlsx dari SIPDRI.', 'error'); return;
+  }
+  setAdminStatus(`⏳ Memproses file <strong>${file.name}</strong>…`, 'info');
+  document.getElementById('previewCard').style.display = 'none';
+  document.getElementById('downloadWrap').style.display = 'none';
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb   = XLSX.read(e.target.result, { type:'array', cellDates:false });
+      const ws   = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval:'' });
+
+      if (!rows.length) { setAdminStatus('❌ File kosong atau format tidak dikenali.','error'); return; }
+
+      // Normalize header keys (lowercase, trim)
+      const normalized = rows.map(row => {
+        const n={};
+        Object.keys(row).forEach(k=>{ n[k.trim().toLowerCase()]=String(row[k]??''); });
+        return n;
+      });
+
+      // Map ke format internal
+      parsedData = normalized.map(row => {
+        const obj={};
+        Object.entries(KOLOM_MAP).forEach(([src,dst])=>{ obj[dst] = row[src]??''; });
+        return obj;
+      }).filter(d=>d.nip); // buang baris kosong
+
+      showPreview(file.name, parsedData);
+      setAdminStatus(`✅ File berhasil dibaca: <strong>${parsedData.length.toLocaleString('id-ID')}</strong> baris ditemukan.`, 'success');
+    } catch(err) {
+      setAdminStatus('❌ Gagal membaca file: '+err.message, 'error');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function showPreview(filename, data) {
+  const previewCard = document.getElementById('previewCard');
+  previewCard.style.display = 'block';
+  document.getElementById('downloadWrap').style.display = 'none';
+  document.getElementById('simpanStatus').textContent = '';
+
+  // Stats
+  const skpds  = new Set(data.map(d=>d.skpd)).size;
+  const golMap = {};
+  data.forEach(d=>{ golMap[d.golongan]=(golMap[d.golongan]||0)+1; });
+  const topGol = Object.entries(golMap).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([g,n])=>`${g}(${n})`).join(', ');
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-box"><div class="stat-num">${data.length.toLocaleString('id-ID')}</div><div class="stat-lbl">Total Pegawai</div></div>
+    <div class="stat-box"><div class="stat-num">${skpds}</div><div class="stat-lbl">Unit Kerja (SKPD)</div></div>
+    <div class="stat-box" style="flex:2"><div class="stat-num" style="font-size:1rem">${topGol}</div><div class="stat-lbl">Golongan Terbanyak</div></div>
+  `;
+
+  // Preview table (5 baris)
+  const cols = ['nip','nama','nik','golongan','jabatan','skpd'];
+  const labels = ['NIP','Nama','NIK','Golongan','Jabatan','SKPD'];
+  const sample = data.slice(0,5);
+  let tbl = `<table class="preview-table"><thead><tr>${labels.map(l=>`<th>${l}</th>`).join('')}</tr></thead><tbody>`;
+  sample.forEach(d=>{ tbl+=`<tr>${cols.map(c=>`<td>${d[c]||'—'}</td>`).join('')}</tr>`; });
+  tbl += `</tbody></table>`;
+  document.getElementById('previewWrap').innerHTML = tbl;
+  if (data.length > 5) {
+    document.getElementById('previewWrap').insertAdjacentHTML('afterend',
+      `<p style="font-size:.75rem;color:var(--teks-sekunder);margin-top:.4rem">Menampilkan 5 dari ${data.length.toLocaleString('id-ID')} baris.</p>`);
+  }
+}
+
+function simpanData() {
+  if (!parsedData.length) return;
+  const btn = document.getElementById('btnSimpan');
+  btn.disabled = true;
+  document.getElementById('simpanStatus').textContent = 'Menyimpan…';
+
+  // Simpan ke localStorage sebagai cache
+  try {
+    if (selectedTipe === 'pns') {
+      dataPNS = parsedData;
+      localStorage.setItem('cache_pns', JSON.stringify(dataPNS));
+    } else {
+      dataPPPK = parsedData;
+      localStorage.setItem('cache_pppk', JSON.stringify(dataPPPK));
+    }
+
+    // Load cache yang lain kalau ada
+    if (selectedTipe === 'pns' && !dataPPPK.length) {
+      const cached = localStorage.getItem('cache_pppk');
+      if (cached) dataPPPK = JSON.parse(cached);
+    }
+    if (selectedTipe === 'pppk' && !dataPNS.length) {
+      const cached = localStorage.getItem('cache_pns');
+      if (cached) dataPNS = JSON.parse(cached);
+    }
+
+    // Gabungkan PNS + PPPK
+    const gabungan = [...dataPNS, ...dataPPPK];
+
+    // Buat file JSON untuk didownload
+    const jsonStr = JSON.stringify(selectedTipe==='pns' ? dataPNS : dataPPPK, null, null);
+    const jsonAll = JSON.stringify(gabungan, null, null);
+
+    const namaFile    = selectedTipe==='pns' ? 'pegawai_pns.json' : 'pegawai_pppk.json';
+    const blobSingle  = new Blob([jsonStr], {type:'application/json'});
+    const blobAll     = new Blob([jsonAll],  {type:'application/json'});
+    const urlSingle   = URL.createObjectURL(blobSingle);
+    const urlAll      = URL.createObjectURL(blobAll);
+
+    const linkSingle = document.getElementById('downloadLink');
+    const linkAll    = document.getElementById('downloadLinkAll');
+    linkSingle.href = urlSingle; linkSingle.download = namaFile;
+    linkSingle.textContent = `📥 Download ${namaFile}`;
+    linkAll.href = urlAll; linkAll.download = 'pegawai.json';
+
+    document.getElementById('downloadMsg').innerHTML =
+      `<strong>${selectedTipe.toUpperCase()}</strong>: ${parsedData.length.toLocaleString('id-ID')} pegawai` +
+      (gabungan.length !== parsedData.length ? ` &nbsp;|&nbsp; <strong>Gabungan PNS+PPPK</strong>: ${gabungan.length.toLocaleString('id-ID')} pegawai` : '');
+
+    document.getElementById('downloadWrap').style.display = 'block';
+    document.getElementById('simpanStatus').textContent = '';
+
+    // Update data live di halaman search
+    allData = gabungan.length ? gabungan : parsedData;
+    buildSkpdFilter();
+    updateAdminInfo();
+
+  } catch(err) {
+    document.getElementById('simpanStatus').textContent = '❌ Gagal: '+err.message;
+  }
+  btn.disabled = false;
+}
+
+function resetAdmin() {
+  parsedData = [];
+  document.getElementById('fileInput').value = '';
+  document.getElementById('adminStatus').innerHTML = '';
+  document.getElementById('previewCard').style.display = 'none';
+  document.getElementById('downloadWrap').style.display = 'none';
+}
+
+// Load cache PNS/PPPK dari localStorage saat pertama buka
+function loadCache() {
+  const cp = localStorage.getItem('cache_pns');
+  const ck = localStorage.getItem('cache_pppk');
+  if (cp) dataPNS  = JSON.parse(cp);
+  if (ck) dataPPPK = JSON.parse(ck);
+}
+
 // ─── INIT ───
+loadCache();
 loadData();
 </script>
 </body>
