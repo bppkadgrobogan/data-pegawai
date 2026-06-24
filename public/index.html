@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pencarian Data Pegawai – BPPKAD Grobogan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --biru-tua:   #1B3A6B;
+      --biru-muda:  #2563EB;
+      --emas:       #C9960C;
+      --emas-muda:  #FEF3C7;
+      --abu:        #F3F4F6;
+      --abu-garis:  #E5E7EB;
+      --teks:       #111827;
+      --teks-sekunder: #6B7280;
+      --putih:      #FFFFFF;
+      --merah:      #DC2626;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--abu); color: var(--teks); min-height: 100vh; }
+
+    /* ─── HEADER ─── */
+    header {
+      background: var(--biru-tua);
+      color: var(--putih);
+      padding: 0 1.5rem;
+    }
+    .header-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 3px solid var(--emas);
+    }
+    .logo-box {
+      width: 52px; height: 52px; flex-shrink: 0;
+      background: var(--emas);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Noto Serif', serif;
+      font-weight: 700; font-size: 1.3rem;
+      color: var(--biru-tua);
+      letter-spacing: -1px;
+    }
+    .header-text h1 { font-size: 1rem; font-weight: 700; line-height: 1.2; }
+    .header-text p  { font-size: 0.72rem; opacity: 0.75; margin-top: 2px; }
+
+    /* ─── MAIN ─── */
+    main { max-width: 960px; margin: 0 auto; padding: 1.5rem; }
+
+    /* ─── SEARCH BOX ─── */
+    .search-card {
+      background: var(--putih);
+      border: 1px solid var(--abu-garis);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .search-label {
+      font-size: 0.78rem; font-weight: 600; color: var(--biru-tua);
+      text-transform: uppercase; letter-spacing: .04em;
+      margin-bottom: 0.5rem; display: block;
+    }
+    .search-row { display: flex; gap: .75rem; flex-wrap: wrap; }
+    .search-input-wrap { flex: 1; min-width: 200px; position: relative; }
+    .search-input-wrap svg {
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      color: var(--teks-sekunder); pointer-events: none;
+    }
+    #searchInput {
+      width: 100%; padding: .6rem .75rem .6rem 2.2rem;
+      border: 1.5px solid var(--abu-garis);
+      border-radius: 8px;
+      font-size: .95rem; font-family: inherit;
+      transition: border-color .15s;
+      outline: none;
+    }
+    #searchInput:focus { border-color: var(--biru-muda); box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+    #btnSearch {
+      background: var(--biru-muda); color: #fff;
+      border: none; border-radius: 8px;
+      padding: .6rem 1.4rem;
+      font-size: .9rem; font-weight: 600; cursor: pointer;
+      transition: background .15s;
+    }
+    #btnSearch:hover { background: #1D4ED8; }
+    #btnClear {
+      background: transparent; color: var(--teks-sekunder);
+      border: 1.5px solid var(--abu-garis); border-radius: 8px;
+      padding: .6rem 1rem;
+      font-size: .9rem; cursor: pointer;
+      transition: all .15s;
+    }
+    #btnClear:hover { border-color: #9CA3AF; color: var(--teks); }
+
+    .filter-row {
+      display: flex; gap: .5rem; flex-wrap: wrap;
+      margin-top: .75rem; align-items: center;
+    }
+    .filter-label { font-size: .78rem; color: var(--teks-sekunder); white-space: nowrap; }
+    select#filterSkpd, select#filterStatus {
+      font-family: inherit; font-size: .82rem;
+      border: 1.5px solid var(--abu-garis); border-radius: 6px;
+      padding: .35rem .6rem; color: var(--teks);
+      background: #fff; cursor: pointer;
+      outline: none; max-width: 280px;
+    }
+    select#filterSkpd:focus, select#filterStatus:focus { border-color: var(--biru-muda); }
+
+    /* ─── STATUS BAR ─── */
+    #statusBar {
+      font-size: .82rem; color: var(--teks-sekunder);
+      margin-bottom: .75rem; min-height: 1.2em;
+    }
+    #statusBar strong { color: var(--biru-tua); }
+
+    /* ─── RESULTS ─── */
+    .results-grid { display: grid; gap: .75rem; }
+
+    .pegawai-card {
+      background: var(--putih);
+      border: 1px solid var(--abu-garis);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      transition: box-shadow .15s, border-color .15s;
+      position: relative;
+    }
+    .pegawai-card:hover {
+      box-shadow: 0 4px 14px rgba(0,0,0,.09);
+      border-color: #CBD5E1;
+    }
+    .card-header { display: flex; align-items: flex-start; gap: .75rem; }
+    .avatar {
+      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      background: var(--biru-tua); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: .95rem; letter-spacing: -.5px;
+    }
+    .card-name { font-weight: 700; font-size: .95rem; line-height: 1.3; }
+    .card-nip  { font-size: .75rem; color: var(--teks-sekunder); margin-top: 1px; font-family: monospace; }
+    .badge {
+      display: inline-block; font-size: .68rem; font-weight: 600;
+      padding: 1px 7px; border-radius: 99px;
+      margin-left: .4rem; vertical-align: middle;
+    }
+    .badge-pns  { background: #DBEAFE; color: #1E40AF; }
+    .badge-pppk { background: #D1FAE5; color: #065F46; }
+    .badge-cpns { background: #FEF3C7; color: #92400E; }
+
+    .card-meta {
+      display: flex; flex-wrap: wrap; gap: .25rem .75rem;
+      margin-top: .5rem; font-size: .78rem; color: var(--teks-sekunder);
+    }
+    .card-meta span { display: flex; align-items: center; gap: 3px; }
+    .card-skpd {
+      font-size: .72rem; color: var(--teks-sekunder);
+      margin-top: .4rem;
+      border-top: 1px dashed var(--abu-garis);
+      padding-top: .4rem;
+      display: flex; align-items: center; gap: 4px;
+    }
+
+    .expand-icon {
+      position: absolute; right: 1rem; top: 1rem;
+      color: var(--abu-garis); font-size: 1.1rem; transition: transform .2s;
+    }
+    .pegawai-card.open .expand-icon { transform: rotate(180deg); color: var(--biru-muda); }
+
+    /* ─── DETAIL PANEL ─── */
+    .detail-panel {
+      display: none; margin-top: .75rem;
+      border-top: 1px solid var(--abu-garis);
+      padding-top: .75rem;
+    }
+    .pegawai-card.open .detail-panel { display: block; }
+
+    .detail-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 600px) { .detail-sections { grid-template-columns: 1fr; } }
+
+    .detail-section { }
+    .detail-section h4 {
+      font-size: .7rem; font-weight: 700; color: var(--biru-tua);
+      text-transform: uppercase; letter-spacing: .05em;
+      margin-bottom: .4rem;
+    }
+    .detail-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+    .detail-table tr td { padding: .22rem .1rem; vertical-align: top; }
+    .detail-table tr td:first-child {
+      color: var(--teks-sekunder); width: 44%; padding-right: .5rem;
+      white-space: nowrap;
+    }
+    .detail-table tr td:last-child { font-weight: 500; }
+    .gaji-row { background: var(--emas-muda); font-weight: 700; }
+    .gaji-row td { padding: .3rem .25rem !important; }
+
+    /* ─── PAGINATION ─── */
+    #pagination {
+      display: flex; justify-content: center; gap: .4rem;
+      flex-wrap: wrap; margin-top: 1rem;
+    }
+    .pg-btn {
+      border: 1.5px solid var(--abu-garis); background: #fff;
+      border-radius: 6px; padding: .35rem .7rem;
+      font-size: .82rem; cursor: pointer; font-family: inherit;
+      transition: all .12s;
+    }
+    .pg-btn:hover { border-color: var(--biru-muda); color: var(--biru-muda); }
+    .pg-btn.active { background: var(--biru-tua); color: #fff; border-color: var(--biru-tua); }
+    .pg-btn:disabled { opacity: .4; cursor: default; }
+
+    /* ─── EMPTY / LOADING ─── */
+    .empty { text-align: center; padding: 3rem; color: var(--teks-sekunder); }
+    .empty p { margin-top: .5rem; font-size: .85rem; }
+    .loading-bar {
+      height: 3px; background: var(--biru-muda);
+      border-radius: 99px; width: 0;
+      animation: load 1s ease forwards;
+    }
+    @keyframes load { to { width: 100%; } }
+
+    /* ─── FOOTER ─── */
+    footer {
+      text-align: center; padding: 1.5rem;
+      font-size: .72rem; color: var(--teks-sekunder);
+      border-top: 1px solid var(--abu-garis);
+      margin-top: 1rem;
+    }
+
+    mark { background: #FEF08A; border-radius: 2px; padding: 0 1px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-box">BP</div>
+    <div class="header-text">
+      <h1>Data Pegawai – BPPKAD Kabupaten Grobogan</h1>
+      <p>Badan Pendapatan, Pengelolaan Keuangan dan Aset Daerah</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="search-card">
+    <label class="search-label" for="searchInput">Cari Pegawai</label>
+    <div class="search-row">
+      <div class="search-input-wrap">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input type="text" id="searchInput"
+          placeholder="Ketik NIK, NIP, atau Nama Pegawai…"
+          autocomplete="off" spellcheck="false" />
+      </div>
+      <button id="btnSearch">Cari</button>
+      <button id="btnClear">Reset</button>
+    </div>
+    <div class="filter-row">
+      <span class="filter-label">Filter:</span>
+      <select id="filterStatus">
+        <option value="">Semua Status ASN</option>
+        <option value="1">PNS</option>
+        <option value="3">PPPK / CPNS</option>
+      </select>
+      <select id="filterSkpd">
+        <option value="">Semua SKPD</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="statusBar"></div>
+  <div id="resultsContainer"></div>
+  <div id="pagination"></div>
+</main>
+
+<footer>
+  Data bersumber dari SIPDRI &bull; BPPKAD Kabupaten Grobogan &bull; Untuk keperluan internal
+</footer>
+
+<script>
+// ─── CONFIG ───
+const PAGE_SIZE = 15;
+let allData   = [];
+let filtered  = [];
+let currentPage = 1;
+let currentQuery = '';
+
+// ─── FORMAT CURRENCY ───
+function rupiah(n) {
+  const num = parseInt(n) || 0;
+  return 'Rp ' + num.toLocaleString('id-ID');
+}
+
+// ─── STATUS LABELS ───
+function statusLabel(s) {
+  if (s === '1') return '<span class="badge badge-pns">PNS</span>';
+  if (s === '3') return '<span class="badge badge-pppk">PPPK</span>';
+  return '<span class="badge badge-cpns">' + s + '</span>';
+}
+
+function nikahLabel(s) {
+  return s === '1' ? 'Menikah' : 'Tidak Menikah / Janda / Duda';
+}
+
+// ─── AVATAR INITIALS ───
+function initials(nama) {
+  const parts = nama.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0][0];
+  return parts[0][0] + parts[1][0];
+}
+
+// ─── HIGHLIGHT MATCH ───
+function highlight(text, query) {
+  if (!query) return text;
+  const esc = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return text.replace(new RegExp(esc, 'gi'), m => `<mark>${m}</mark>`);
+}
+
+// ─── LOAD DATA ───
+async function loadData() {
+  const container = document.getElementById('resultsContainer');
+  container.innerHTML = '<div class="search-card"><div class="loading-bar"></div><p style="font-size:.82rem;color:#6B7280;margin-top:.5rem">Memuat data pegawai…</p></div>';
+  try {
+    const res = await fetch('pegawai.json');
+    allData = await res.json();
+    buildSkpdFilter();
+    container.innerHTML = '';
+    document.getElementById('statusBar').innerHTML =
+      `Data siap: <strong>${allData.length.toLocaleString('id-ID')}</strong> pegawai dimuat. Silakan mulai pencarian.`;
+  } catch(e) {
+    container.innerHTML = '<div class="empty">⚠️ Gagal memuat data. Pastikan file <code>pegawai.json</code> tersedia.<p>' + e.message + '</p></div>';
+  }
+}
+
+function buildSkpdFilter() {
+  const skpds = [...new Set(allData.map(d => d.skpd))].sort();
+  const sel = document.getElementById('filterSkpd');
+  skpds.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s; opt.textContent = s;
+    sel.appendChild(opt);
+  });
+}
+
+// ─── SEARCH ───
+function doSearch() {
+  const q      = document.getElementById('searchInput').value.trim();
+  const skpd   = document.getElementById('filterSkpd').value;
+  const status = document.getElementById('filterStatus').value;
+  currentQuery = q;
+  currentPage  = 1;
+
+  if (!q && !skpd && !status) {
+    document.getElementById('resultsContainer').innerHTML = '';
+    document.getElementById('statusBar').innerHTML =
+      `Data siap: <strong>${allData.length.toLocaleString('id-ID')}</strong> pegawai dimuat. Silakan mulai pencarian.`;
+    document.getElementById('pagination').innerHTML = '';
+    filtered = [];
+    return;
+  }
+
+  const ql = q.toLowerCase();
+  filtered = allData.filter(d => {
+    const matchQ = !q ||
+      d.nip.includes(q) ||
+      d.nik.includes(q) ||
+      d.nama.toLowerCase().includes(ql);
+    const matchSkpd   = !skpd   || d.skpd === skpd;
+    const matchStatus = !status || d.status_asn === status;
+    return matchQ && matchSkpd && matchStatus;
+  });
+
+  renderPage();
+}
+
+// ─── RENDER PAGE ───
+function renderPage() {
+  const container = document.getElementById('resultsContainer');
+  const status    = document.getElementById('statusBar');
+  const total = filtered.length;
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const slice = filtered.slice(start, start + PAGE_SIZE);
+
+  if (total === 0) {
+    container.innerHTML = '<div class="empty">🔍 Tidak ditemukan data yang sesuai.<p>Coba kata kunci lain atau ubah filter.</p></div>';
+    status.innerHTML = 'Hasil: <strong>0</strong> pegawai ditemukan.';
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+
+  status.innerHTML = `Menampilkan <strong>${start+1}–${Math.min(start+PAGE_SIZE, total)}</strong> dari <strong>${total.toLocaleString('id-ID')}</strong> hasil.`;
+
+  container.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'results-grid';
+
+  slice.forEach((d, idx) => {
+    const card = document.createElement('div');
+    card.className = 'pegawai-card';
+    card.innerHTML = `
+      <span class="expand-icon">▼</span>
+      <div class="card-header">
+        <div class="avatar">${initials(d.nama)}</div>
+        <div>
+          <div class="card-name">${highlight(d.nama, currentQuery)} ${statusLabel(d.status_asn)}</div>
+          <div class="card-nip">NIP: ${highlight(d.nip, currentQuery)} &nbsp;|&nbsp; NIK: ${highlight(d.nik, currentQuery)}</div>
+          <div class="card-meta">
+            <span>🎖 ${d.golongan}</span>
+            <span>💼 ${d.jabatan || '—'}</span>
+            <span>📅 Lahir: ${d.tgl_lahir}</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-skpd">🏛 ${d.skpd}</div>
+
+      <div class="detail-panel">
+        <div class="detail-sections">
+          <div class="detail-section">
+            <h4>Data Pribadi</h4>
+            <table class="detail-table">
+              <tr><td>NIK</td><td>${d.nik}</td></tr>
+              <tr><td>NIP</td><td>${d.nip}</td></tr>
+              <tr><td>NPWP</td><td>${d.npwp || '—'}</td></tr>
+              <tr><td>Tgl Lahir</td><td>${d.tgl_lahir}</td></tr>
+              <tr><td>Status Nikah</td><td>${nikahLabel(d.status_nikah)}</td></tr>
+              <tr><td>Alamat</td><td>${d.alamat || '—'}</td></tr>
+            </table>
+          </div>
+          <div class="detail-section">
+            <h4>Data Kepegawaian</h4>
+            <table class="detail-table">
+              <tr><td>Golongan</td><td>${d.golongan}</td></tr>
+              <tr><td>Masa Kerja Gol.</td><td>${d.masa_kerja} tahun</td></tr>
+              <tr><td>Jabatan</td><td>${d.jabatan || '—'}</td></tr>
+              <tr><td>Eselon</td><td>${d.eselon || '—'}</td></tr>
+              <tr><td>Status ASN</td><td>${d.status_asn === '1' ? 'PNS' : 'PPPK'}</td></tr>
+              <tr><td>Bank</td><td>${d.bank}</td></tr>
+              <tr><td>No. Rekening</td><td>${d.rekening}</td></tr>
+            </table>
+          </div>
+          <div class="detail-section">
+            <h4>Gaji & Tunjangan</h4>
+            <table class="detail-table">
+              <tr><td>Gaji Pokok</td><td>${rupiah(d.gaji_pokok)}</td></tr>
+              <tr><td>Tunj. Keluarga</td><td>${rupiah(d.tunjangan_keluarga)}</td></tr>
+              <tr><td>Tunj. Jabatan</td><td>${rupiah(d.tunjangan_jabatan)}</td></tr>
+              <tr><td>Tunj. Fungsional</td><td>${rupiah(d.tunjangan_fungsional)}</td></tr>
+              <tr><td>Tunj. Fung. Umum</td><td>${rupiah(d.tunjangan_fungsional_umum)}</td></tr>
+              <tr><td>Tunj. Beras</td><td>${rupiah(d.tunjangan_beras)}</td></tr>
+              <tr><td>Total Bruto</td><td><strong>${rupiah(d.jumlah_gaji)}</strong></td></tr>
+            </table>
+          </div>
+          <div class="detail-section">
+            <h4>Potongan & Transfer</h4>
+            <table class="detail-table">
+              <tr><td>Total Potongan</td><td>${rupiah(d.jumlah_potongan)}</td></tr>
+              <tr class="gaji-row"><td><strong>Gaji Ditransfer</strong></td><td><strong>${rupiah(d.jumlah_transfer)}</strong></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+
+    card.addEventListener('click', () => {
+      card.classList.toggle('open');
+    });
+
+    grid.appendChild(card);
+  });
+
+  container.appendChild(grid);
+  renderPagination(total);
+}
+
+// ─── PAGINATION ───
+function renderPagination(total) {
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const pg = document.getElementById('pagination');
+  pg.innerHTML = '';
+  if (totalPages <= 1) return;
+
+  const makeBtn = (label, page, disabled, active) => {
+    const btn = document.createElement('button');
+    btn.className = 'pg-btn' + (active ? ' active' : '');
+    btn.textContent = label;
+    btn.disabled = disabled;
+    btn.onclick = () => { currentPage = page; renderPage(); window.scrollTo({top:0, behavior:'smooth'}); };
+    return btn;
+  };
+
+  pg.appendChild(makeBtn('‹ Prev', currentPage - 1, currentPage === 1, false));
+
+  let start = Math.max(1, currentPage - 2);
+  let end   = Math.min(totalPages, start + 4);
+  if (end - start < 4) start = Math.max(1, end - 4);
+
+  if (start > 1) { pg.appendChild(makeBtn('1', 1, false, false)); if (start > 2) pg.appendChild(Object.assign(document.createElement('span'), {textContent:'…', style:'padding:.35rem .3rem;font-size:.82rem;color:#9CA3AF'})); }
+  for (let i = start; i <= end; i++) pg.appendChild(makeBtn(i, i, false, i === currentPage));
+  if (end < totalPages) { if (end < totalPages-1) pg.appendChild(Object.assign(document.createElement('span'), {textContent:'…', style:'padding:.35rem .3rem;font-size:.82rem;color:#9CA3AF'})); pg.appendChild(makeBtn(totalPages, totalPages, false, false)); }
+
+  pg.appendChild(makeBtn('Next ›', currentPage + 1, currentPage === totalPages, false));
+}
+
+// ─── EVENTS ───
+document.getElementById('btnSearch').addEventListener('click', doSearch);
+document.getElementById('btnClear').addEventListener('click', () => {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('filterSkpd').value  = '';
+  document.getElementById('filterStatus').value = '';
+  doSearch();
+});
+document.getElementById('searchInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSearch();
+});
+document.getElementById('filterSkpd').addEventListener('change', doSearch);
+document.getElementById('filterStatus').addEventListener('change', doSearch);
+
+// ─── INIT ───
+loadData();
+</script>
+</body>
+</html>
