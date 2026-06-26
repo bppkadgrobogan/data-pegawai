@@ -232,6 +232,95 @@
     }
     .download-link:hover { text-decoration: underline; }
 
+
+    /* ─── COPY BUTTON ─── */
+    .detail-actions {
+      display: flex; gap: .5rem; margin-bottom: .75rem; flex-wrap: wrap;
+    }
+    .btn-copy {
+      display: inline-flex; align-items: center; gap: .35rem;
+      background: var(--abu); border: 1.5px solid var(--abu-garis);
+      border-radius: 6px; padding: .3rem .75rem;
+      font-size: .75rem; font-weight: 600; cursor: pointer;
+      font-family: inherit; color: var(--teks-sekunder);
+      transition: all .15s;
+    }
+    .btn-copy:hover { background: #E5E7EB; color: var(--teks); border-color: #9CA3AF; }
+    .btn-copy.copied { background: var(--hijau-muda); color: var(--hijau); border-color: #86EFAC; }
+    .detail-text-box {
+      background: var(--abu); border: 1px solid var(--abu-garis);
+      border-radius: 8px; padding: .75rem 1rem;
+      font-size: .8rem; line-height: 1.8; white-space: pre-wrap;
+      word-break: break-word; color: var(--teks);
+      user-select: text; cursor: text;
+      max-height: 320px; overflow-y: auto;
+      display: none;
+    }
+    .detail-text-box.show { display: block; }
+
+    /* ─── REKAP PAGE ─── */
+    .rekap-filter-row { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+    .skpd-list { display: flex; flex-direction: column; gap: .75rem; }
+
+    .skpd-block {
+      background: var(--putih); border: 1px solid var(--abu-garis);
+      border-radius: 12px; overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    }
+    .skpd-block-header {
+      background: var(--biru-tua); color: #fff;
+      padding: .75rem 1.25rem; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      transition: background .15s;
+    }
+    .skpd-block-header:hover { background: #243f78; }
+    .skpd-block-header h3 { font-size: .88rem; font-weight: 700; line-height: 1.3; flex: 1; }
+    .skpd-block-header .skpd-summary {
+      font-size: .75rem; opacity: .8; margin-top: 2px;
+    }
+    .skpd-block-header .toggle-icon { font-size: 1rem; margin-left: 1rem; transition: transform .2s; }
+    .skpd-block.open .toggle-icon { transform: rotate(180deg); }
+    .skpd-block-body { display: none; padding: 1rem 1.25rem; }
+    .skpd-block.open .skpd-block-body { display: block; }
+
+    .rekap-tabs { display: flex; gap: .4rem; margin-bottom: .75rem; }
+    .rekap-tab-btn {
+      padding: .35rem .9rem; border-radius: 6px; font-size: .78rem; font-weight: 600;
+      cursor: pointer; border: 1.5px solid var(--abu-garis); background: var(--abu);
+      font-family: inherit; color: var(--teks-sekunder); transition: all .15s;
+    }
+    .rekap-tab-btn.active { background: var(--biru-tua); color: #fff; border-color: var(--biru-tua); }
+
+    .rekap-section { display: none; }
+    .rekap-section.active { display: block; }
+
+    .rekap-table { width: 100%; border-collapse: collapse; font-size: .78rem; margin-bottom: .75rem; }
+    .rekap-table th {
+      background: #EFF6FF; color: var(--biru-tua);
+      padding: .45rem .6rem; text-align: left; font-weight: 700;
+      border-bottom: 2px solid #BFDBFE; white-space: nowrap;
+    }
+    .rekap-table th.right, .rekap-table td.right { text-align: right; }
+    .rekap-table td { padding: .4rem .6rem; border-bottom: 1px solid var(--abu-garis); }
+    .rekap-table tr:last-child td { border-bottom: none; }
+    .rekap-table tr.total-row td { background: var(--emas-muda); font-weight: 700; }
+    .rekap-table tr.subtotal td { background: #F0F9FF; font-weight: 600; color: var(--biru-tua); }
+    .rekap-table tr:hover td { background: var(--abu); }
+    .rekap-table tr.total-row:hover td { background: var(--emas-muda); }
+
+    .rekap-copy-btn {
+      display: inline-flex; align-items: center; gap: .35rem;
+      background: var(--abu); border: 1.5px solid var(--abu-garis);
+      border-radius: 6px; padding: .3rem .75rem;
+      font-size: .75rem; font-weight: 600; cursor: pointer;
+      font-family: inherit; color: var(--teks-sekunder); margin-bottom: .6rem;
+      transition: all .15s;
+    }
+    .rekap-copy-btn:hover { background: #E5E7EB; color: var(--teks); }
+    .rekap-copy-btn.copied { background: var(--hijau-muda); color: var(--hijau); border-color: #86EFAC; }
+
+    .no-data { font-size: .82rem; color: var(--teks-sekunder); padding: .5rem 0; font-style: italic; }
+
     footer { text-align: center; padding: 1.5rem; font-size: .72rem; color: var(--teks-sekunder); border-top: 1px solid var(--abu-garis); margin-top: 1rem; }
   </style>
 </head>
@@ -250,6 +339,7 @@
 <nav>
   <div class="nav-inner">
     <button class="nav-tab active" onclick="showPage('search', this)">🔍 Cari Pegawai</button>
+    <button class="nav-tab" onclick="showPage('rekap', this)">📊 Rekap per SKPD</button>
     <button class="nav-tab" onclick="showPage('admin', this)">⚙️ Update Database</button>
   </div>
 </nav>
@@ -284,6 +374,23 @@
     <div id="statusBar"></div>
     <div id="resultsContainer"></div>
     <div id="pagination"></div>
+  </div>
+
+  <!-- ══════════════ PAGE: REKAP ══════════════ -->
+  <div id="page-rekap" class="page">
+    <div class="card">
+      <div class="card-title">📊 Rekapitulasi per SKPD</div>
+      <div class="rekap-filter-row">
+        <span class="filter-label">Tampilkan:</span>
+        <select id="rekapFilterStatus" onchange="renderRekap()">
+          <option value="">Semua (PNS + CPNS + PPPK)</option>
+          <option value="pns_cpns">PNS & CPNS saja</option>
+          <option value="pppk">PPPK saja</option>
+        </select>
+        <span id="rekapInfo" style="font-size:.78rem;color:var(--teks-sekunder);margin-left:.5rem"></span>
+      </div>
+    </div>
+    <div id="rekapList" class="skpd-list"></div>
   </div>
 
   <!-- ══════════════ PAGE: ADMIN ══════════════ -->
@@ -480,6 +587,13 @@ function renderPage() {
       </div>
       <div class="card-skpd">🏛 ${d.skpd}</div>
       <div class="detail-panel">
+        <div class="detail-actions">
+          <button class="btn-copy" onclick="copyDetail(this, '${d.nip}')">📋 Salin Semua Data</button>
+          <button class="btn-copy" onclick="copyField(this, 'NIP: ${d.nip}')">Salin NIP</button>
+          <button class="btn-copy" onclick="copyField(this, 'NIK: ${d.nik}')">Salin NIK</button>
+          <button class="btn-copy" onclick="copyField(this, 'Rekening: ${d.rekening}')">Salin Rekening</button>
+        </div>
+        <div class="detail-text-box" id="textbox-${d.nip}"></div>
         <div class="detail-sections">
           <div class="detail-section"><h4>Data Pribadi</h4>
             <table class="detail-table">
@@ -555,6 +669,281 @@ document.getElementById('filterStatus').addEventListener('change', doSearch);
 
 
 // ══════════════════════════════════════════════
+// COPY FUNCTIONS
+// ══════════════════════════════════════════════
+function buildDetailText(d) {
+  const statusTeks = d.status_asn==='1'?'PNS':d.status_asn==='3'?'CPNS':'PPPK';
+  return [
+    '=== DATA PEGAWAI ===',
+    `Nama          : ${d.nama}`,
+    `Status ASN    : ${statusTeks}`,
+    '',
+    '--- Data Pribadi ---',
+    `NIK           : ${d.nik}`,
+    `NIP           : ${d.nip}`,
+    `NPWP          : ${d.npwp||'—'}`,
+    `Tgl Lahir     : ${d.tgl_lahir}`,
+    `Status Nikah  : ${nikahLabel(d.status_nikah)}`,
+    `Alamat        : ${d.alamat||'—'}`,
+    '',
+    '--- Kepegawaian ---',
+    `SKPD          : ${d.skpd}`,
+    `Jabatan       : ${d.jabatan||'—'}`,
+    `Eselon        : ${d.eselon||'—'}`,
+    `Golongan      : ${d.golongan}`,
+    `Masa Kerja    : ${d.masa_kerja} tahun`,
+    `Bank          : ${d.bank}`,
+    `No. Rekening  : ${d.rekening}`,
+    '',
+    '--- Gaji & Tunjangan ---',
+    `Gaji Pokok    : ${rupiah(d.gaji_pokok)}`,
+    `Tunj. Keluarga: ${rupiah(d.tunjangan_keluarga)}`,
+    `Tunj. Jabatan : ${rupiah(d.tunjangan_jabatan)}`,
+    `Tunj. Fungsional     : ${rupiah(d.tunjangan_fungsional)}`,
+    `Tunj. Fung. Umum     : ${rupiah(d.tunjangan_fungsional_umum)}`,
+    `Tunj. Beras   : ${rupiah(d.tunjangan_beras)}`,
+    `Total Bruto   : ${rupiah(d.jumlah_gaji)}`,
+    '',
+    '--- Potongan & Transfer ---',
+    `Total Potongan: ${rupiah(d.jumlah_potongan)}`,
+    `Gaji Ditransfer: ${rupiah(d.jumlah_transfer)}`,
+  ].join('\n');
+}
+
+function copyDetail(btn, nip) {
+  const d = allData.find(x=>x.nip===nip);
+  if (!d) return;
+  const text = buildDetailText(d);
+  const box = document.getElementById('textbox-'+nip);
+  box.textContent = text;
+  box.classList.toggle('show');
+  if (box.classList.contains('show')) {
+    navigator.clipboard.writeText(text).then(()=>{
+      btn.textContent = '✅ Tersalin!'; btn.classList.add('copied');
+      setTimeout(()=>{ btn.textContent = '📋 Salin Semua Data'; btn.classList.remove('copied'); }, 2000);
+    });
+  } else {
+    btn.textContent = '📋 Salin Semua Data';
+  }
+}
+
+function copyField(btn, text) {
+  navigator.clipboard.writeText(text).then(()=>{
+    const orig = btn.textContent;
+    btn.textContent = '✅ Tersalin!'; btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ══════════════════════════════════════════════
+// REKAP PAGE
+// ══════════════════════════════════════════════
+function renderRekap() {
+  const filter = document.getElementById('rekapFilterStatus').value;
+  const list   = document.getElementById('rekapList');
+
+  let data = allData;
+  if (filter === 'pns_cpns') data = allData.filter(d=>d.status_asn==='1'||d.status_asn==='3');
+  if (filter === 'pppk')     data = allData.filter(d=>d.status_asn==='4');
+
+  const skpds = [...new Set(data.map(d=>d.skpd))].sort();
+  document.getElementById('rekapInfo').textContent =
+    `${skpds.length} SKPD, ${data.length.toLocaleString('id-ID')} pegawai`;
+
+  list.innerHTML = '';
+  skpds.forEach((skpd, idx) => {
+    const pegawai = data.filter(d=>d.skpd===skpd);
+    const pns  = pegawai.filter(d=>d.status_asn==='1');
+    const cpns = pegawai.filter(d=>d.status_asn==='3');
+    const pppk = pegawai.filter(d=>d.status_asn==='4');
+
+    const sumField = (arr, f) => arr.reduce((s,d)=>s+(parseInt(d[f])||0), 0);
+
+    // Rekap per golongan
+    const golMap = {};
+    pegawai.forEach(d=>{
+      if (!golMap[d.golongan]) golMap[d.golongan]={count:0,gaji:0,potongan:0,transfer:0};
+      golMap[d.golongan].count++;
+      golMap[d.golongan].gaji     += parseInt(d.jumlah_gaji)||0;
+      golMap[d.golongan].potongan += parseInt(d.jumlah_potongan)||0;
+      golMap[d.golongan].transfer += parseInt(d.jumlah_transfer)||0;
+    });
+    const golRows = Object.entries(golMap).sort((a,b)=>a[0].localeCompare(b[0]));
+
+    // Total keseluruhan
+    const totGaji     = sumField(pegawai,'jumlah_gaji');
+    const totPotongan = sumField(pegawai,'jumlah_potongan');
+    const totTransfer = sumField(pegawai,'jumlah_transfer');
+    const totGajiPokok = sumField(pegawai,'gaji_pokok');
+    const totTunjKel   = sumField(pegawai,'tunjangan_keluarga');
+    const totTunjJab   = sumField(pegawai,'tunjangan_jabatan');
+    const totTunjFung  = sumField(pegawai,'tunjangan_fungsional');
+    const totTunjFungU = sumField(pegawai,'tunjangan_fungsional_umum');
+    const totTunjBeras = sumField(pegawai,'tunjangan_beras');
+
+    // Build copy text
+    function buildRekapText() {
+      const lines = [
+        `REKAP GAJI - ${skpd}`,
+        `Total Pegawai: ${pegawai.length} (PNS: ${pns.length}, CPNS: ${cpns.length}, PPPK: ${pppk.length})`,
+        '',
+        'PER GOLONGAN:',
+        'Golongan | Pegawai | Bruto | Potongan | Transfer',
+      ];
+      golRows.forEach(([gol, r])=>{
+        lines.push(`${gol} | ${r.count} | ${rupiah(r.gaji)} | ${rupiah(r.potongan)} | ${rupiah(r.transfer)}`);
+      });
+      lines.push('');
+      lines.push('RINCIAN KOMPONEN GAJI:');
+      lines.push(`Gaji Pokok        : ${rupiah(totGajiPokok)}`);
+      lines.push(`Tunj. Keluarga    : ${rupiah(totTunjKel)}`);
+      lines.push(`Tunj. Jabatan     : ${rupiah(totTunjJab)}`);
+      lines.push(`Tunj. Fungsional  : ${rupiah(totTunjFung)}`);
+      lines.push(`Tunj. Fung. Umum  : ${rupiah(totTunjFungU)}`);
+      lines.push(`Tunj. Beras       : ${rupiah(totTunjBeras)}`);
+      lines.push(`TOTAL BRUTO       : ${rupiah(totGaji)}`);
+      lines.push(`TOTAL POTONGAN    : ${rupiah(totPotongan)}`);
+      lines.push(`TOTAL TRANSFER    : ${rupiah(totTransfer)}`);
+      return lines.join('\n');
+    }
+
+    const blockId = `skpd-${idx}`;
+    const block = document.createElement('div');
+    block.className = 'skpd-block';
+    block.innerHTML = `
+      <div class="skpd-block-header" onclick="toggleSkpd('${blockId}')">
+        <div>
+          <h3>🏛 ${skpd}</h3>
+          <div class="skpd-summary">${pegawai.length} pegawai &nbsp;·&nbsp; PNS: ${pns.length} &nbsp;·&nbsp; CPNS: ${cpns.length}${pppk.length?` &nbsp;·&nbsp; PPPK: ${pppk.length}`:''} &nbsp;·&nbsp; Transfer: ${rupiah(totTransfer)}</div>
+        </div>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="skpd-block-body">
+
+        <div class="rekap-tabs">
+          <button class="rekap-tab-btn active" onclick="switchRekapTab('${blockId}','golongan',this)">Per Golongan</button>
+          <button class="rekap-tab-btn" onclick="switchRekapTab('${blockId}','komponen',this)">Rincian Gaji</button>
+          ${(!filter||filter==='pns_cpns') ? `<button class="rekap-tab-btn" onclick="switchRekapTab('${blockId}','status',this)">Per Status</button>` : ''}
+        </div>
+
+        <!-- TAB: Per Golongan -->
+        <div class="rekap-section active" id="${blockId}-golongan">
+          <button class="rekap-copy-btn" onclick="copyRekap(this,'${blockId}')">📋 Salin Rekap</button>
+          <div style="overflow-x:auto">
+          <table class="rekap-table">
+            <thead><tr>
+              <th>Golongan</th>
+              <th class="right">Pegawai</th>
+              <th class="right">Total Bruto</th>
+              <th class="right">Total Potongan</th>
+              <th class="right">Total Transfer</th>
+            </tr></thead>
+            <tbody>
+              ${golRows.map(([gol,r])=>`
+              <tr>
+                <td>${gol}</td>
+                <td class="right">${r.count}</td>
+                <td class="right">${rupiah(r.gaji)}</td>
+                <td class="right">${rupiah(r.potongan)}</td>
+                <td class="right">${rupiah(r.transfer)}</td>
+              </tr>`).join('')}
+              <tr class="total-row">
+                <td><strong>TOTAL</strong></td>
+                <td class="right"><strong>${pegawai.length}</strong></td>
+                <td class="right"><strong>${rupiah(totGaji)}</strong></td>
+                <td class="right"><strong>${rupiah(totPotongan)}</strong></td>
+                <td class="right"><strong>${rupiah(totTransfer)}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+        </div>
+
+        <!-- TAB: Rincian Komponen Gaji -->
+        <div class="rekap-section" id="${blockId}-komponen">
+          <button class="rekap-copy-btn" onclick="copyRekap(this,'${blockId}')">📋 Salin Rekap</button>
+          <div style="overflow-x:auto">
+          <table class="rekap-table">
+            <thead><tr><th>Komponen</th><th class="right">Jumlah</th></tr></thead>
+            <tbody>
+              <tr><td>Gaji Pokok</td><td class="right">${rupiah(totGajiPokok)}</td></tr>
+              <tr><td>Tunjangan Keluarga</td><td class="right">${rupiah(totTunjKel)}</td></tr>
+              <tr><td>Tunjangan Jabatan</td><td class="right">${rupiah(totTunjJab)}</td></tr>
+              <tr><td>Tunjangan Fungsional</td><td class="right">${rupiah(totTunjFung)}</td></tr>
+              <tr><td>Tunjangan Fungsional Umum</td><td class="right">${rupiah(totTunjFungU)}</td></tr>
+              <tr><td>Tunjangan Beras</td><td class="right">${rupiah(totTunjBeras)}</td></tr>
+              <tr class="subtotal"><td>Total Bruto</td><td class="right">${rupiah(totGaji)}</td></tr>
+              <tr><td>Total Potongan</td><td class="right">${rupiah(totPotongan)}</td></tr>
+              <tr class="total-row"><td><strong>Gaji Ditransfer</strong></td><td class="right"><strong>${rupiah(totTransfer)}</strong></td></tr>
+            </tbody>
+          </table>
+          </div>
+        </div>
+
+        <!-- TAB: Per Status -->
+        <div class="rekap-section" id="${blockId}-status">
+          <button class="rekap-copy-btn" onclick="copyRekap(this,'${blockId}')">📋 Salin Rekap</button>
+          <div style="overflow-x:auto">
+          <table class="rekap-table">
+            <thead><tr>
+              <th>Status</th>
+              <th class="right">Pegawai</th>
+              <th class="right">Total Bruto</th>
+              <th class="right">Total Potongan</th>
+              <th class="right">Total Transfer</th>
+            </tr></thead>
+            <tbody>
+              ${pns.length?`<tr><td>PNS</td><td class="right">${pns.length}</td><td class="right">${rupiah(sumField(pns,'jumlah_gaji'))}</td><td class="right">${rupiah(sumField(pns,'jumlah_potongan'))}</td><td class="right">${rupiah(sumField(pns,'jumlah_transfer'))}</td></tr>`:''}
+              ${cpns.length?`<tr><td>CPNS</td><td class="right">${cpns.length}</td><td class="right">${rupiah(sumField(cpns,'jumlah_gaji'))}</td><td class="right">${rupiah(sumField(cpns,'jumlah_potongan'))}</td><td class="right">${rupiah(sumField(cpns,'jumlah_transfer'))}</td></tr>`:''}
+              ${pppk.length?`<tr><td>PPPK</td><td class="right">${pppk.length}</td><td class="right">${rupiah(sumField(pppk,'jumlah_gaji'))}</td><td class="right">${rupiah(sumField(pppk,'jumlah_potongan'))}</td><td class="right">${rupiah(sumField(pppk,'jumlah_transfer'))}</td></tr>`:''}
+              <tr class="total-row">
+                <td><strong>TOTAL</strong></td>
+                <td class="right"><strong>${pegawai.length}</strong></td>
+                <td class="right"><strong>${rupiah(totGaji)}</strong></td>
+                <td class="right"><strong>${rupiah(totPotongan)}</strong></td>
+                <td class="right"><strong>${rupiah(totTransfer)}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+        </div>
+
+        <div style="display:none" id="${blockId}-rekaptext">${buildRekapText()}</div>
+      </div>
+    `;
+    list.appendChild(block);
+  });
+}
+
+function toggleSkpd(blockId) {
+  const allBlocks = document.querySelectorAll('.skpd-block');
+  allBlocks.forEach(b => {
+    if (b.querySelector(`#${blockId}-golongan`)) {
+      b.classList.toggle('open');
+    }
+  });
+}
+
+function switchRekapTab(blockId, tab, btn) {
+  const body = document.getElementById(blockId+'-golongan')?.closest('.skpd-block-body');
+  if (!body) return;
+  body.querySelectorAll('.rekap-section').forEach(s=>s.classList.remove('active'));
+  body.querySelectorAll('.rekap-tab-btn').forEach(b=>b.classList.remove('active'));
+  const sec = document.getElementById(blockId+'-'+tab);
+  if (sec) sec.classList.add('active');
+  btn.classList.add('active');
+}
+
+function copyRekap(btn, blockId) {
+  const textEl = document.getElementById(blockId+'-rekaptext');
+  if (!textEl) return;
+  navigator.clipboard.writeText(textEl.textContent).then(()=>{
+    btn.textContent = '✅ Tersalin!'; btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent = '📋 Salin Rekap'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ══════════════════════════════════════════════
 // ADMIN PAGE
 // ══════════════════════════════════════════════
 let selectedTipe = 'pns';
@@ -602,6 +991,7 @@ function showPage(page, btn) {
   document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   btn.classList.add('active');
+  if (page === 'rekap' && allData.length) renderRekap();
 }
 
 // Drag & Drop
